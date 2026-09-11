@@ -187,7 +187,12 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
       <h1>365 Consistency</h1>
       <div class="sub">Sep 11, 2026 – Sep 10, 2027 · <b>✓ done → ◐ half → ✕ missed → blank</b> · strict mode: only today &amp; yesterday are editable — no rewriting history, no pre-filling the future 🔒</div>
     </div>
-    <div class="savestate" id="save">Loaded</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button id="exportbtn" title="Download all your data as a JSON backup file">⬇ Backup</button>
+      <button id="importbtn" title="Restore data from a JSON backup file">⬆ Restore</button>
+      <input type="file" id="importfile" accept="application/json,.json" hidden>
+      <div class="savestate" id="save">Loaded</div>
+    </div>
   </header>
 
   <div class="tabs">
@@ -902,6 +907,40 @@ notesEl.value = state.notes||"";
 notesEl.addEventListener("change", function(){
   state.notes = notesEl.value;
   scheduleSave();
+});
+
+// ---------- backup & restore ----------
+document.getElementById("exportbtn").onclick = function(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "consistency-tracker-backup-"+iso(new Date())+".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+  setSave("Backup downloaded ✓");
+};
+document.getElementById("importbtn").onclick = function(){
+  document.getElementById("importfile").click();
+};
+document.getElementById("importfile").addEventListener("change", function(){
+  var f = this.files[0]; this.value = "";
+  if(!f) return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    try{
+      var data = JSON.parse(rd.result);
+      if(!data || !Array.isArray(data.tasks) || typeof data.entries!=="object") throw new Error("bad shape");
+      askConfirm("Replace all current data with this backup?", function(yes){
+        if(!yes) return;
+        state = data;
+        refresh(); renderHours(); renderTodos();
+        var n = document.getElementById("notes"); n.value = state.notes||"";
+        scheduleSave();
+        setSave("Backup restored ✓");
+      });
+    }catch(e){ setSave("That file isn't a valid tracker backup", true); }
+  };
+  rd.readAsText(f);
 });
 
 refresh();

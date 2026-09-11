@@ -642,6 +642,7 @@ function moveMonth(n){
 var curTab = "daily";
 function showTab(t){
   curTab = t;
+  try{ localStorage.setItem("ct365_tab", t); }catch(e){}
   document.getElementById("tab-daily").hidden = t!=="daily";
   document.getElementById("tab-hourly").hidden = t!=="hourly";
   document.getElementById("tab-todos").hidden = t!=="todos";
@@ -946,5 +947,10 @@ document.getElementById("importfile").addEventListener("change", function(){
 refresh();
 renderHours();
 renderTodos();
+// restore the tab you were on before the last reload
+try{
+  var savedTab = localStorage.getItem("ct365_tab");
+  if(savedTab==="hourly" || savedTab==="todos") showTab(savedTab);
+}catch(e){}
 })();
 </script>

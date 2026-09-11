@@ -156,6 +156,54 @@ tr.nowhour td.hourlbl{color:var(--accent);font-weight:700;box-shadow:inset 3px 0
 #notes li{margin:2px 0}
 #notes input.ncb{width:15px;height:15px;accent-color:var(--accent);vertical-align:-2px;margin-right:6px;cursor:pointer}
 #notes .ckd{text-decoration:line-through;color:var(--muted)}
+/* --- home --- */
+.homehead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px}
+.homekicker{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700}
+.homedate{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:26px;letter-spacing:-.01em}
+.homebal{min-width:220px}
+.homebal .lbl{display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.homebal .lbl b{color:var(--ink);font-variant-numeric:tabular-nums}
+.home{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+.hcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.hcard.wide{grid-column:1/-1}
+.hcard h4{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.hcard h4 .n{font-size:11px;font-weight:600;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:0 8px;font-variant-numeric:tabular-nums}
+.hcard h4 .go{margin-left:auto;font-size:11px;font-weight:600;color:var(--accent);cursor:pointer;background:none;border:0;padding:2px 6px}
+.hcard h4 .go:hover{text-decoration:underline}
+.hmuted{color:var(--muted);font-size:13px}
+.prio{display:flex;align-items:center;gap:10px;margin:6px 0}
+.prio .num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.prio input{flex:1;font:inherit;font-size:14px;color:var(--ink);background:transparent;border:0;border-bottom:1px dashed var(--line);padding:5px 2px;outline:none}
+.prio input:focus{border-bottom-color:var(--accent)}
+.bal{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+.dots{display:flex;gap:5px}
+.dot5{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--line);background:transparent;cursor:pointer;padding:0;transition:transform .1s}
+.dot5:hover{transform:scale(1.2)}
+.dot5.on{background:var(--accent);border-color:var(--accent)}
+.dot5.eng.on{background:var(--half);border-color:var(--half)}
+.htask{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.htask:last-child{border-bottom:0}
+.htask.done span{text-decoration:line-through;color:var(--muted)}
+.htask input{width:17px;height:17px;accent-color:var(--accent);flex:none}
+.tl{list-style:none;margin:0;padding:0;max-height:260px;overflow-y:auto}
+.tl li{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}
+.tl li:last-child{border-bottom:0}
+.tl .t{color:var(--muted);font-variant-numeric:tabular-nums;width:64px;flex:none}
+.tl li.now .t{color:var(--accent);font-weight:700}
+.tl li.now{background:var(--accent-soft);margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:6px}
+.habits{display:flex;flex-wrap:wrap;gap:8px}
+.habits table{width:auto;min-width:0;border-collapse:separate;border-spacing:6px 0}
+.habits td{border:0}
+.habits td.cell{min-width:0;border-radius:8px;padding:0 12px;height:34px;font-size:14px;background:var(--bg)}
+.habits td.cell.s1{background:var(--done-bg)} .habits td.cell.s2{background:var(--half-bg)} .habits td.cell.s3{background:var(--miss-bg)}
+.habits .hname{font-size:11px;color:var(--muted);text-align:center;padding-top:3px;border:0}
+.moodrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.moodrow table{width:auto;min-width:0}
+.moodrow td.mood{border:0;border-radius:8px;background:var(--bg);width:46px}
+#quick{width:100%;min-height:96px;resize:vertical;font:inherit;font-size:14px;line-height:1.5;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+#quick:focus,#remind:focus{outline:2px solid var(--accent);outline-offset:-1px}
+#remind{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--half-bg);border:1px solid var(--half);border-radius:8px;padding:10px 12px}
+.homequote{text-align:center;font-family:"Fraunces",Georgia,serif;font-size:17px;color:var(--muted);margin:26px 0 10px;font-style:italic}
 /* --- plans board --- */
 .swatches{display:flex;gap:5px;align-items:center}
 .sw{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
@@ -213,6 +261,9 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
 .dlg .presets button{border-radius:999px;padding:5px 13px;font-size:13px}
 .dlg .presets button:hover{background:var(--accent-soft);border-color:var(--accent)}
 .dlg .btns{display:flex;justify-content:flex-end;gap:8px}
+.dlg label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:6px 0 3px}
+.dlg p{font-size:13px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.dlg code{background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px;user-select:all}
 @media (max-width:600px){body{padding:14px 8px 48px} h1{font-size:22px}}
 </style>
 <div class="wrap">
@@ -221,7 +272,8 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
       <h1>365 Consistency</h1>
       <div class="sub">Sep 11, 2026 – Sep 10, 2027 · <b>✓ done → ◐ half → ✕ missed → blank</b> · strict mode: only today &amp; yesterday are editable — no rewriting history, no pre-filling the future 🔒</div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button id="syncbtn" title="Sync your data across devices through a private Gist in your GitHub account">☁ Sync</button>
       <button id="exportbtn" title="Download all your data as a JSON backup file">⬇ Backup</button>
       <button id="importbtn" title="Restore data from a JSON backup file">⬆ Restore</button>
       <input type="file" id="importfile" accept="application/json,.json" hidden>
@@ -230,13 +282,26 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
   </header>
 
   <div class="tabs">
-    <button id="tabbtn-daily" class="active">Daily tracker</button>
+    <button id="tabbtn-home" class="active">🏠 Home</button>
+    <button id="tabbtn-daily">Daily tracker</button>
     <button id="tabbtn-hourly">Hourly log</button>
     <button id="tabbtn-todos">To-dos &amp; Notes</button>
     <button id="tabbtn-plans">🎨 Plans</button>
   </div>
 
-  <div id="tab-daily">
+  <div id="tab-home">
+    <div class="homehead">
+      <div>
+        <div class="homekicker">What matters today?</div>
+        <div class="homedate" id="homedate"></div>
+      </div>
+      <div class="homebal" id="homebal"></div>
+    </div>
+    <div class="home" id="home"></div>
+    <div class="homequote">Today doesn't need to be perfect. What matters is moving forward.</div>
+  </div>
+
+  <div id="tab-daily" hidden>
   <div class="stats" id="stats"></div>
 
   <div class="heatcard">
@@ -279,10 +344,16 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
   </div>
 
   <div id="tab-todos" hidden>
+    <div class="toolbar">
+      <button id="tprev" aria-label="Previous day">‹ Prev day</button>
+      <div class="daylabel" id="tlabel"></div>
+      <button id="tnext" aria-label="Next day">Next day ›</button>
+      <button id="ttoday">Today</button>
+    </div>
     <div class="addrow">
-      <input id="newtodo" placeholder="Add a to-do and press Enter…" aria-label="New to-do">
+      <input id="newtodo" placeholder="Add a to-do for this day and press Enter…" aria-label="New to-do">
       <select id="newsec" aria-label="Add to which list" title="Which list to add it to">
-        <option value="0">📌 Today</option>
+        <option value="0">📌 This day</option>
         <option value="2">📦 Backlog</option>
         <option value="3">⏳ Left over</option>
       </select>
@@ -298,7 +369,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
     </div>
     <div class="subtabs" id="todoview"></div>
     <div id="todolist"></div>
-    <div class="noteshead">Notes</div>
+    <div class="noteshead" id="noteshead">Notes</div>
     <div class="notebar">
       <button data-cmd="h" title="Heading">H</button>
       <button data-cmd="p" title="Normal text">¶</button>
@@ -311,7 +382,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
       <button data-cmd="ck" title="Insert a checkbox item">☑ Check</button>
     </div>
     <div id="notes" contenteditable="true" data-placeholder="Backlogs, leftovers, what got done, anything… Use the toolbar for headings, lists and checkboxes."></div>
-    <div class="foot">To-dos and notes save automatically. Select text, then use the toolbar to format it.</div>
+    <div class="foot">Every day has its own to-do list and notes page — use ‹ Prev / Next › to move between days. Backlog is shared across all days. Saves automatically.</div>
   </div>
 
   <div id="tab-plans" hidden>
@@ -324,6 +395,19 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
       <span class="k">🎨 pick a color, pin your plan to the board · click a note to edit · drag corner feel, zero pressure</span>
     </div>
     <div class="board" id="plansboard"></div>
+  </div>
+</div>
+
+<div id="syncdlg" class="dlgwrap" hidden>
+  <div class="dlg" role="dialog" aria-modal="true">
+    <h3>☁ Sync across devices</h3>
+    <p>Your data is stored in a <b>private Gist in your own GitHub account</b> — nothing goes anywhere else. One-time setup: create a token at <b>github.com → Settings → Developer settings → Personal access tokens</b> (classic token with the <b>gist</b> scope, or a fine-grained token with <b>Gists: read &amp; write</b>). Paste it below on each device.</p>
+    <label for="synctoken">GitHub token</label>
+    <input id="synctoken" type="password" autocomplete="off" placeholder="ghp_… or github_pat_…">
+    <label for="syncgist">Sync code (leave blank on your first device)</label>
+    <input id="syncgist" autocomplete="off" placeholder="paste the sync code from your other device">
+    <div id="syncinfo" style="font-size:13px;margin-bottom:10px"></div>
+    <div class="btns"><button id="syncoff">Disconnect</button><button id="synccancel">Cancel</button><button id="syncok" class="primary">Connect</button></div>
   </div>
 </div>
 
@@ -347,7 +431,9 @@ var START = new Date(2026,8,11);           // Sep 11 2026
 var DAYS = 365;
 var SYM = ["","✓","◐","✕"];
 var MOODS = ["","😄","🙂","😐","😕","😫"];
-var state = JSON.parse(document.getElementById("state").textContent);
+var state;
+try{ state = JSON.parse(document.getElementById("state").textContent); }
+catch(e){ state = {tasks:["Task 1","Task 2","Task 3"], entries:{}, mood:{}, hours:{}, todos:[], rev:0}; }
 try{ var ls = localStorage.getItem("ct365"); if(ls){ var l=JSON.parse(ls); if((l.rev||0) > (state.rev||0)) state = l; } }catch(e){}
 
 var artifactNS = null, canPublish = false;
@@ -363,7 +449,8 @@ var viewYM;   // [year, monthIndex]
 
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function addDays(d,n){ var x=new Date(d); x.setDate(x.getDate()+n); return x; }
-function clampDate(d){ var end=addDays(START,DAYS-1); if(d<START) return new Date(START); if(d>end) return end; return d; }
+function today0(){ var t=new Date(); t.setHours(0,0,0,0); return t; }
+function clampDate(d){ var end=addDays(START,DAYS-1); d=new Date(d); d.setHours(0,0,0,0); if(d<START) return new Date(START); if(d>end) return end; return d; }
 function dayIndex(d){ return Math.round((d - START)/86400000); }
 function setSave(msg, err){ var el=document.getElementById("save"); el.textContent=msg; el.className="savestate"+(err?" err":""); }
 
@@ -410,26 +497,28 @@ document.getElementById("dlginput").addEventListener("keydown", function(e){
 var saveTimer=null;
 function scheduleSave(){
   state.rev = (state.rev||0)+1;
+  state.updated = Date.now();
   try{ localStorage.setItem("ct365", JSON.stringify(state)); }catch(e){}
+  if(typeof syncPush==="function") syncPush();
   setSave("Saving…");
   clearTimeout(saveTimer);
   saveTimer = setTimeout(doPublish, 1200);
 }
 function doPublish(){
   if(!canPublish){ setSave("Saved on this device only"); return; }
-  document.getElementById("state").textContent = JSON.stringify(state);
-  var app = document.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard");
-  document.getElementById("tab-daily").hidden = false;
-  document.getElementById("tab-hourly").hidden = true;
-  document.getElementById("tab-todos").hidden = true;
-  document.getElementById("tab-plans").hidden = true;
-  document.getElementById("dlg").hidden = true;
-  document.querySelectorAll(".floaty,#confetti").forEach(function(el){ el.remove(); });
-  var saved = [];
-  app.forEach(function(el){ saved.push(el.innerHTML); el.innerHTML=""; });
-  var html = "<!doctype html>\n<html>"+document.documentElement.innerHTML+"</html>";
-  app.forEach(function(el,i){ el.innerHTML = saved[i]; });
-  showTab(curTab);
+  // escape "<" so user text can never close the JSON <script> block early
+  document.getElementById("state").textContent = JSON.stringify(state).replace(/</g,"\\u003c");
+  // serialize a CLONE so the live page (focus, open dialog, half-typed text) is never disturbed
+  var clone = document.documentElement.cloneNode(true);
+  clone.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard,#home,#notes").forEach(function(el){ el.innerHTML=""; });
+  clone.querySelectorAll(".floaty,#confetti").forEach(function(el){ el.remove(); });
+  var dlg = clone.querySelector("#dlg"); if(dlg) dlg.hidden = true;
+  ["home","daily","hourly","todos","plans"].forEach(function(k){
+    var pane = clone.querySelector("#tab-"+k), btn = clone.querySelector("#tabbtn-"+k);
+    if(pane) pane.hidden = k!=="home";
+    if(btn) btn.className = k==="home"?"active":"";
+  });
+  var html = "<!doctype html>\n<html>"+clone.innerHTML+"</html>";
   artifactNS.publish(html).then(function(){ setSave("Saved ✓"); })
     .catch(function(e){
       if(e && e.code==="conflict"){ return; }             // page reloads to winner
@@ -518,7 +607,7 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 
 // ---------- year heatmap ----------
 function dayPct(dIso){
-  var nt = state.tasks.length; if(!nt) return 0;
+  var nt = state.tasks.length; if(!nt) return {pct:0, any:false, allMiss:false};
   var s = 0, any=false, allMiss=true;
   for(var t=0;t<nt;t++){ var m=getMark(dIso,t); s+=score(m); if(m){any=true;} if(m!==3) allMiss=false; }
   return {pct:s/nt, any:any, allMiss:allMiss&&any};
@@ -603,7 +692,7 @@ function editableDay(dIso){
   var today = new Date(); today.setHours(0,0,0,0);
   var p = dIso.split("-");
   var d = new Date(+p[0], +p[1]-1, +p[2]);
-  var diff = (today - d)/86400000;
+  var diff = Math.round((today - d)/86400000);
   return diff >= 0 && diff <= 1;
 }
 function lockedMsg(dIso){
@@ -619,7 +708,7 @@ function isPerfect(dIso){
   return true;
 }
 
-function refresh(){ renderStats(); renderGrid(); renderHeatmap(); }
+function refresh(){ renderStats(); renderGrid(); renderHeatmap(); if(typeof renderHome==="function") renderHome(); }
 
 // ---------- events ----------
 document.getElementById("grid").addEventListener("click", handleAct);
@@ -699,25 +788,27 @@ function moveMonth(n){
 }
 
 // ---------- tabs ----------
-var curTab = "daily";
+var curTab = "home";
 function showTab(t){
   curTab = t;
   try{ localStorage.setItem("ct365_tab", t); }catch(e){}
-  ["daily","hourly","todos","plans"].forEach(function(k){
+  ["home","daily","hourly","todos","plans"].forEach(function(k){
     document.getElementById("tab-"+k).hidden = t!==k;
     document.getElementById("tabbtn-"+k).className = t===k?"active":"";
   });
+  if(t==="home") renderHome();
   if(t==="hourly") renderHours();
   if(t==="todos") renderTodos();
   if(t==="plans") renderPlans();
 }
+document.getElementById("tabbtn-home").onclick=function(){ showTab("home"); };
 document.getElementById("tabbtn-daily").onclick=function(){ showTab("daily"); };
 document.getElementById("tabbtn-hourly").onclick=function(){ showTab("hourly"); };
 document.getElementById("tabbtn-todos").onclick=function(){ showTab("todos"); };
 document.getElementById("tabbtn-plans").onclick=function(){ showTab("plans"); };
 
 // ---------- hourly log ----------
-var hourDate = clampDate(new Date());
+var hourDate = clampDate(today0());
 function hourLabel(h){
   var ampm = h<12 ? "am" : "pm";
   var hh = h%12; if(hh===0) hh=12;
@@ -758,7 +849,7 @@ function moveDay(n){
 }
 document.getElementById("hprev").onclick=function(){ moveDay(-1); };
 document.getElementById("hnext").onclick=function(){ moveDay(1); };
-document.getElementById("htoday").onclick=function(){ hourDate = clampDate(new Date()); renderHours(); };
+document.getElementById("htoday").onclick=function(){ hourDate = clampDate(today0()); renderHours(); };
 
 // ---------- to-dos & notes ----------
 var TSTAT = ["To do","Done","Backlog","Left over"];
@@ -810,35 +901,57 @@ function groupedRows(indices, autoSet){
   return h;
 }
 function section(title, emoji, indices, open, emptyMsg, autoSet){
-  return "<details class='tsec'"+(open?" open":"")+"><summary>"+emoji+" "+title+"<span class='n'>"+indices.length+"</span></summary>"+
-    "<div class='secpanel'>"+(indices.length?groupedRows(indices, autoSet):"<div class='todoempty'>"+emptyMsg+"</div>")+"</div></details>";
+  // sections are always visible — same fixed layout on every day's page
+  return "<div class='todayhead'>"+emoji+" "+title+"<span class='n'>"+indices.length+"</span></div>"+
+    "<div class='secpanel' style='margin-bottom:14px'>"+(indices.length?groupedRows(indices, autoSet):"<div class='todoempty'>"+emptyMsg+"</div>")+"</div>";
+}
+// the day whose to-do page is showing (same template for every day)
+var todoDate = clampDate(today0());
+function todoIso(){ return iso(todoDate); }
+function dayLabel(d){
+  return WD[d.getDay()]+", "+String(d.getDate()).padStart(2,"0")+" "+MONTHS[d.getMonth()]+" "+d.getFullYear();
 }
 function renderTodos(){
   (state.todos||[]).forEach(function(it){ if(!it.d) it.d = iso(new Date()); });
   if(!state.todos) state.todos = [];
+  var selIso = todoIso(), todayIso = iso(new Date());
+  var isToday = selIso===todayIso, isFuture = selIso>todayIso;
+  document.getElementById("tlabel").innerHTML =
+    (isToday?"<span style='color:var(--accent)'>Today</span> · ":"")+dayLabel(todoDate);
   // view style switcher
   document.getElementById("todoview").innerHTML =
     "<button data-v='check' class='"+(todoStyle()==="check"?"active":"")+"'>☑ Checkboxes</button>"+
     "<button data-v='bullet' class='"+(todoStyle()==="bullet"?"active":"")+"'>• Bullets</button>";
   var list = state.todos;
-  var todayIso = iso(new Date());
-  var today=[], backlog=[], leftover=[], doneOld=[], autoLeft=[];
+  var day=[], backlog=[], leftover=[], done=[], autoLeft=[];
   list.forEach(function(it,i){
-    if(it.s===1){ doneOld.push(i); return; }   // done items (any date) live in the Done section
-    if(it.s===2){ backlog.push(i); return; }
-    if(it.d===todayIso){ today.push(i); return; }
-    if(it.s===3){ leftover.push(i); return; }
-    leftover.push(i); autoLeft.push(i);   // older, still not done -> auto left over
+    if(it.s===2){ backlog.push(i); return; }             // backlog is one shared parking lot
+    if(it.d===selIso){
+      if(it.s===1) done.push(i);
+      else if(it.s===3) leftover.push(i);
+      else day.push(i);
+      return;
+    }
+    // earlier days' unfinished work rolls forward onto this day's page as "left over"
+    if(it.d<selIso && (it.s===0 || it.s===3) && !isFuture){ leftover.push(i); autoLeft.push(i); }
   });
-  var h = "<div class='todayhead'>📌 Today<span class='n'>"+today.length+"</span></div>"+
+  var h = "<div class='todayhead'>📌 "+(isToday?"Today":isFuture?"Planned for this day":"This day")+"<span class='n'>"+day.length+"</span></div>"+
     "<div class='secpanel' style='margin-bottom:14px'>"+
-    (today.length?groupedRows(today):"<div class='todoempty'>Nothing for today yet — add one above.</div>")+"</div>";
+    (day.length?groupedRows(day):"<div class='todoempty'>"+(isToday?"Nothing for today yet — add one above.":"Nothing on this day — add one above.")+"</div>")+"</div>";
   h += section("Left over", "⏳", leftover, leftover.length>0 || openSec===3, "Nothing left over — clean slate.", autoLeft);
   h += section("Backlog", "📦", backlog, openSec===2, "Backlog is empty.");
-  h += section("Done", "✅", doneOld, openSec===1, "Nothing marked done yet.");
+  h += section("Done", "✅", done, openSec===1, "Nothing marked done on this day yet.");
   openSec = null;
   document.getElementById("todolist").innerHTML = h;
+  renderNotes();
 }
+function moveTodoDay(n){
+  todoDate = clampDate(addDays(todoDate,n));
+  renderTodos();
+}
+document.getElementById("tprev").onclick=function(){ moveTodoDay(-1); };
+document.getElementById("tnext").onclick=function(){ moveTodoDay(1); };
+document.getElementById("ttoday").onclick=function(){ todoDate = clampDate(today0()); renderTodos(); };
 document.getElementById("todoview").addEventListener("click", function(e){
   var b = e.target.closest("button[data-v]");
   if(!b) return;
@@ -846,7 +959,15 @@ document.getElementById("todoview").addEventListener("click", function(e){
   state.ui.todoStyle = b.dataset.v;
   renderTodos(); scheduleSave();
 });
+var lastTodayIso = iso(new Date());
 setInterval(function(){
+  var nowIso = iso(new Date());
+  if(nowIso !== lastTodayIso){                       // midnight passed while the page was open
+    if(todoIso()===lastTodayIso) todoDate = today0();
+    if(iso(hourDate)===lastTodayIso) hourDate = today0();
+    lastTodayIso = nowIso;
+    refresh(); if(curTab==="todos") renderTodos(); if(curTab==="hourly") renderHours();
+  }
   var list = state.todos||[];
   // timers finish even if another tab is open
   var finished = false;
@@ -890,7 +1011,7 @@ function addTodo(){
   if(!v) return;
   if(!state.todos) state.todos = [];
   var s = +document.getElementById("newsec").value || 0;
-  state.todos.unshift({t:v, s:s, d:iso(new Date())});
+  state.todos.unshift({t:v, s:s, d:todoIso()});
   openSec = s;
   inp.value = "";
   renderTodos(); scheduleSave();
@@ -905,6 +1026,7 @@ document.getElementById("todolist").addEventListener("click", function(e){
   if(cb){
     var it = state.todos[+cb.dataset.i];
     it.s = it.s===1 ? 0 : 1;
+    if(it.d < todoIso()) it.d = todoIso();          // rolled-forward item now belongs to the day you acted on
     if(it.s===1){ floaty("✅", e.clientX||innerWidth/2, e.clientY||innerHeight/2); openSec = 1; }
     renderTodos(); scheduleSave(); return;
   }
@@ -912,6 +1034,7 @@ document.getElementById("todolist").addEventListener("click", function(e){
   if(chip){
     var it = state.todos[+chip.dataset.i];
     it.s = (it.s+1)%4;
+    if(it.d < todoIso() && it.s!==2) it.d = todoIso();
     if(it.s===1 || it.s===2 || it.s===3) openSec = it.s;
     renderTodos(); scheduleSave(); return;
   }
@@ -963,18 +1086,31 @@ document.getElementById("todolist").addEventListener("click", function(e){
     });
   }
 });
-// ---------- formal notes editor ----------
+// ---------- formal notes editor (one notes page per day) ----------
 var notesEl = document.getElementById("notes");
-(function initNotes(){
-  var n = state.notes||"";
-  // migrate old plain-text notes to HTML once
-  if(n && n.indexOf("<")===-1){
-    n = "<p>"+esc(n).replace(/\n/g,"<br>")+"</p>";
+(function migrateNotes(){
+  if(!state.notesByDay) state.notesByDay = {};
+  // older versions kept a single global note — move it onto today's page once
+  if("notes" in state){
+    var n = state.notes;
+    if(n){
+      if(n.indexOf("<")===-1) n = "<p>"+esc(n).replace(/\n/g,"<br>")+"</p>";
+      if(!state.notesByDay[iso(new Date())]) state.notesByDay[iso(new Date())] = n;
+    }
+    delete state.notes;
   }
-  notesEl.innerHTML = n;
 })();
+function renderNotes(){
+  var selIso = todoIso();
+  var n = (state.notesByDay||{})[selIso]||"";
+  if(notesEl.innerHTML !== n) notesEl.innerHTML = n;     // avoid resetting the caret while typing
+  document.getElementById("noteshead").textContent = "Notes · "+dayLabel(todoDate);
+}
 function saveNotes(){
-  state.notes = notesEl.innerHTML;
+  if(!state.notesByDay) state.notesByDay = {};
+  var html = notesEl.innerHTML;
+  var empty = !notesEl.textContent.trim() && !notesEl.querySelector("input,ul,ol,h3,li");
+  if(empty) delete state.notesByDay[todoIso()]; else state.notesByDay[todoIso()] = html;
   scheduleSave();
 }
 notesEl.addEventListener("input", saveNotes);
@@ -1002,6 +1138,89 @@ document.querySelectorAll(".notebar button").forEach(function(b){
       "<div><input type='checkbox' class='ncb' contenteditable='false'>&nbsp;</div>");
     saveNotes();
   });
+});
+
+// ---------- home: "What matters today?" ----------
+var AREAS = [["🎓","Career"],["💪","Health"],["🧠","Mind"],["🙏","Spiritual"],["❤️","Relationships"],["💰","Money"],["🌸","Joy"]];
+function dayMap(key){ if(!state[key]) state[key] = {}; return state[key]; }
+function renderHome(){
+  var tIso = iso(new Date());
+  document.getElementById("homedate").textContent = dayLabel(today0());
+  var bal = dayMap("balance")[tIso]||[];
+  var rated = bal.filter(function(v){return v>0;});
+  var avg = rated.length ? rated.reduce(function(a,b){return a+b;},0)/rated.length/5 : 0;
+  document.getElementById("homebal").innerHTML =
+    "<div class='lbl'><span>Life balance today</span><b>"+(rated.length?Math.round(avg*100)+"%":"not rated yet")+"</b></div>"+
+    "<div class='bar'><i style='width:"+(avg*100).toFixed(0)+"%'></i></div>";
+  var h = "";
+  // top 3 priorities
+  var pr = dayMap("priorities")[tIso]||["","",""];
+  var ph = ["The one thing that matters most","Second priority","Third priority"];
+  h += "<div class='hcard'><h4>🎯 Top 3 priorities</h4>"+[0,1,2].map(function(i){
+    return "<div class='prio'><span class='num'>"+(i+1)+"</span><input class='pri' data-i='"+i+"' value=\""+esc(pr[i]||"")+"\" placeholder='"+ph[i]+"'></div>";
+  }).join("")+"</div>";
+  // today's tasks
+  var todos = state.todos||[], tIdx = [];
+  todos.forEach(function(it,i){ if(it.d===tIso && (it.s===0||it.s===1)) tIdx.push(i); });
+  var openN = tIdx.filter(function(i){return todos[i].s===0;}).length;
+  h += "<div class='hcard'><h4>📋 Today's tasks<span class='n'>"+openN+" open</span><button class='go' data-tab='todos'>To-dos →</button></h4>";
+  h += tIdx.length ? tIdx.map(function(i){ var it=todos[i];
+    return "<label class='htask"+(it.s===1?" done":"")+"'><input type='checkbox' class='hcb' data-i='"+i+"' "+(it.s===1?"checked":"")+"><span>"+esc(it.t)+"</span></label>";
+  }).join("") : "<div class='hmuted'>No tasks for today yet — add them in To-dos.</div>";
+  h += "</div>";
+  // schedule
+  var hrs = (state.hours||{})[tIso]||{}, nowH = new Date().getHours();
+  var keys = Object.keys(hrs).map(Number).sort(function(a,b){return a-b;});
+  h += "<div class='hcard'><h4>🕐 Schedule<button class='go' data-tab='hourly'>Hourly log →</button></h4>";
+  h += keys.length
+    ? "<ul class='tl'>"+keys.map(function(k){ return "<li"+(k===nowH?" class='now'":"")+"><span class='t'>"+hourLabel(k)+"</span><span>"+esc(hrs[k])+"</span></li>"; }).join("")+"</ul>"
+    : "<div class='hmuted'>Nothing logged yet. It's "+hourLabel(nowH)+" — what are you doing right now?</div>";
+  h += "</div>";
+  // habits (same cells as the daily tracker — click to cycle)
+  h += "<div class='hcard'><h4>✅ Habits<button class='go' data-tab='daily'>Daily tracker →</button></h4><div class='habits'><table><tr>";
+  state.tasks.forEach(function(t,ti){ var v=getMark(tIso,ti);
+    h += "<td class='cell s"+v+"' data-d='"+tIso+"' data-t='"+ti+"' tabindex='0' role='button' title='"+esc(t)+"'>"+(SYM[v]||"·")+"</td>"; });
+  h += "</tr><tr>"+state.tasks.map(function(t){ return "<td class='hname'>"+esc(t)+"</td>"; }).join("")+"</tr></table></div></div>";
+  // mood & energy
+  var mv = (state.mood||{})[tIso]||0, en = dayMap("energy")[tIso]||0;
+  h += "<div class='hcard'><h4>😊 Mood &amp; energy</h4><div class='moodrow'><table><tr><td class='mood"+(mv?"":" empty")+"' data-d='"+tIso+"' tabindex='0' role='button' title='Click to cycle mood'>"+(mv?MOODS[mv]:"·")+"</td></tr></table>"+
+    "<div><div class='hmuted' style='margin-bottom:4px'>Energy "+(en?en+"/5":"")+"</div><div class='dots'>"+[1,2,3,4,5].map(function(n){
+      return "<button class='dot5 eng"+(n<=en?" on":"")+"' data-e='"+n+"' title='Energy "+n+"/5'></button>"; }).join("")+"</div></div></div></div>";
+  // life balance (7 areas, rate 1-5)
+  h += "<div class='hcard'><h4>⚖️ Life balance<span class='n'>rate 1–5</span></h4>"+AREAS.map(function(a,i){
+    return "<div class='bal'><span>"+a[0]+" "+a[1]+"</span><span class='dots'>"+[1,2,3,4,5].map(function(n){
+      return "<button class='dot5"+(n<=(bal[i]||0)?" on":"")+"' data-a='"+i+"' data-v='"+n+"' title='"+a[1]+" "+n+"/5'></button>"; }).join("")+"</span></div>";
+  }).join("")+"</div>";
+  // quick notes
+  h += "<div class='hcard'><h4>📝 Quick notes</h4><textarea id='quick' placeholder='Anything on your mind…'>"+esc(dayMap("quick")[tIso]||"")+"</textarea></div>";
+  // one reminder
+  h += "<div class='hcard wide'><h4>🔔 One important reminder</h4><input id='remind' value=\""+esc(dayMap("reminder")[tIso]||"")+"\" placeholder='The one thing you must not forget today'></div>";
+  document.getElementById("home").innerHTML = h;
+}
+document.getElementById("home").addEventListener("click", function(e){
+  var tIso = iso(new Date());
+  var go = e.target.closest(".go"); if(go){ showTab(go.dataset.tab); return; }
+  var cb = e.target.closest("input.hcb");
+  if(cb){ var it = state.todos[+cb.dataset.i]; it.s = it.s===1?0:1; if(it.s===1) floaty("✅", e.clientX, e.clientY); renderHome(); scheduleSave(); return; }
+  var bd = e.target.closest(".dot5[data-a]");
+  if(bd){ var arr = dayMap("balance")[tIso]||[0,0,0,0,0,0,0]; var a=+bd.dataset.a, v=+bd.dataset.v;
+    arr[a] = arr[a]===v ? 0 : v; dayMap("balance")[tIso] = arr; renderHome(); scheduleSave(); return; }
+  var ed = e.target.closest(".dot5.eng");
+  if(ed){ var v2=+ed.dataset.e; dayMap("energy")[tIso] = dayMap("energy")[tIso]===v2 ? 0 : v2; renderHome(); scheduleSave(); return; }
+  if(e.target.closest("td.cell,td.mood")) handleAct(e);   // same behaviour as the daily tracker
+});
+document.getElementById("home").addEventListener("keydown", function(e){
+  if((e.key==="Enter"||e.key===" ") && e.target.closest("td.cell,td.mood")){ e.preventDefault(); handleAct(e); }
+});
+document.getElementById("home").addEventListener("change", function(e){
+  var tIso = iso(new Date());
+  if(e.target.classList.contains("pri")){
+    var pr = dayMap("priorities")[tIso]||["","",""]; pr[+e.target.dataset.i] = e.target.value.trim(); dayMap("priorities")[tIso] = pr; scheduleSave();
+  } else if(e.target.id==="quick"){
+    var q = e.target.value; if(q.trim()) dayMap("quick")[tIso]=q; else delete dayMap("quick")[tIso]; scheduleSave();
+  } else if(e.target.id==="remind"){
+    var r = e.target.value.trim(); if(r) dayMap("reminder")[tIso]=r; else delete dayMap("reminder")[tIso]; scheduleSave();
+  }
 });
 
 // ---------- plans board ----------
@@ -1068,6 +1287,7 @@ document.getElementById("plansboard").addEventListener("click", function(e){
 });
 
 // ---------- backup & restore ----------
+function rerenderAll(){ refresh(); renderHours(); renderTodos(); renderPlans(); }
 document.getElementById("exportbtn").onclick = function(){
   var blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
   var a = document.createElement("a");
@@ -1077,9 +1297,7 @@ document.getElementById("exportbtn").onclick = function(){
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
   setSave("Backup downloaded ✓");
 };
-document.getElementById("importbtn").onclick = function(){
-  document.getElementById("importfile").click();
-};
+document.getElementById("importbtn").onclick = function(){ document.getElementById("importfile").click(); };
 document.getElementById("importfile").addEventListener("change", function(){
   var f = this.files[0]; this.value = "";
   if(!f) return;
@@ -1090,18 +1308,99 @@ document.getElementById("importfile").addEventListener("change", function(){
       if(!data || !Array.isArray(data.tasks) || typeof data.entries!=="object") throw new Error("bad shape");
       askConfirm("Replace all current data with this backup?", function(yes){
         if(!yes) return;
-        state = data;
-        refresh(); renderHours(); renderTodos(); renderPlans();
-        var n = state.notes||"";
-        if(n && n.indexOf("<")===-1) n = "<p>"+esc(n).replace(/\n/g,"<br>")+"</p>";
-        document.getElementById("notes").innerHTML = n;
-        scheduleSave();
-        setSave("Backup restored ✓");
+        state = data; rerenderAll(); scheduleSave(); setSave("Backup restored ✓");
       });
     }catch(e){ setSave("That file isn't a valid tracker backup", true); }
   };
   rd.readAsText(f);
 });
+
+// ---------- cross-device sync via a private GitHub Gist ----------
+var GH_TOKEN = "", GIST_ID = "", syncTimer = null, syncEtag = null;
+try{ GH_TOKEN = localStorage.getItem("ct365_gh_token")||""; GIST_ID = localStorage.getItem("ct365_gist")||""; }catch(e){}
+var GIST_FILE = "consistency-tracker.json";
+function syncBtn(t){ document.getElementById("syncbtn").textContent = t; }
+function ghFetch(url, opts){
+  opts = opts||{};
+  opts.headers = Object.assign({"Authorization":"Bearer "+GH_TOKEN, "Accept":"application/vnd.github+json"}, opts.headers||{});
+  return fetch(url, opts);
+}
+function adoptRemote(remote){
+  state = remote;
+  try{ localStorage.setItem("ct365", JSON.stringify(state)); }catch(e){}
+  rerenderAll();
+}
+function syncPull(cb){
+  if(!GH_TOKEN || !GIST_ID){ if(cb) cb(); return; }
+  ghFetch("https://api.github.com/gists/"+GIST_ID, {headers: syncEtag?{"If-None-Match":syncEtag}:{}}).then(function(r){
+    if(r.status===304) return null;
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    syncEtag = r.headers.get("ETag");
+    return r.json();
+  }).then(function(g){
+    if(g){
+      var f = g.files && g.files[GIST_FILE];
+      if(f && f.content){
+        var remote = JSON.parse(f.content);
+        if((remote.updated||0) > (state.updated||0)){ adoptRemote(remote); setSave("Synced ☁ — pulled newer data"); }
+      }
+    }
+    syncBtn("☁ Synced"); if(cb) cb();
+  }).catch(function(e){ syncBtn("☁ Sync error"); setSave("Sync failed: "+e.message, true); if(cb) cb(e); });
+}
+function syncPush(){
+  if(!GH_TOKEN || !GIST_ID) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(function(){
+    var files = {}; files[GIST_FILE] = {content: JSON.stringify(state)};
+    ghFetch("https://api.github.com/gists/"+GIST_ID, {method:"PATCH", body: JSON.stringify({files:files})})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); syncEtag = r.headers.get("ETag"); setSave("Synced ☁"); syncBtn("☁ Synced"); })
+      .catch(function(e){ syncBtn("☁ Sync error"); setSave("Sync failed: "+e.message+" — kept on this device", true); });
+  }, 1500);
+}
+document.getElementById("syncbtn").onclick = function(){
+  document.getElementById("synctoken").value = GH_TOKEN;
+  document.getElementById("syncgist").value = GIST_ID;
+  document.getElementById("syncinfo").innerHTML = GIST_ID
+    ? "✅ Connected. Your sync code: <code>"+esc(GIST_ID)+"</code> — enter this (with your token) on your other device."
+    : "";
+  document.getElementById("syncdlg").hidden = false;
+};
+document.getElementById("synccancel").onclick = function(){ document.getElementById("syncdlg").hidden = true; };
+document.getElementById("syncoff").onclick = function(){
+  GH_TOKEN = ""; GIST_ID = ""; syncEtag = null;
+  try{ localStorage.removeItem("ct365_gh_token"); localStorage.removeItem("ct365_gist"); }catch(e){}
+  syncBtn("☁ Sync"); setSave("Sync disconnected — saved on this device only");
+  document.getElementById("syncdlg").hidden = true;
+};
+document.getElementById("syncok").onclick = function(){
+  var tok = document.getElementById("synctoken").value.trim();
+  var gid = document.getElementById("syncgist").value.trim();
+  var info = document.getElementById("syncinfo");
+  if(!tok){ info.textContent = "Please paste a GitHub token first."; return; }
+  GH_TOKEN = tok; try{ localStorage.setItem("ct365_gh_token", tok); }catch(e){}
+  info.textContent = "Connecting…";
+  if(gid){
+    GIST_ID = gid; syncEtag = null; try{ localStorage.setItem("ct365_gist", gid); }catch(e){}
+    syncPull(function(err){
+      if(err){ info.textContent = "Couldn't reach that sync code — check the token and code."; return; }
+      syncPush(); info.innerHTML = "✅ Connected. Sync code: <code>"+esc(GIST_ID)+"</code>";
+      setTimeout(function(){ document.getElementById("syncdlg").hidden = true; }, 900);
+    });
+  } else {
+    var files = {}; files[GIST_FILE] = {content: JSON.stringify(state)};
+    ghFetch("https://api.github.com/gists", {method:"POST", body: JSON.stringify({description:"365 Consistency tracker data", public:false, files:files})})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(g){
+        GIST_ID = g.id; try{ localStorage.setItem("ct365_gist", g.id); }catch(e){}
+        syncBtn("☁ Synced"); setSave("Synced ☁");
+        info.innerHTML = "✅ Connected! Your sync code: <code>"+esc(g.id)+"</code><br>On your other device: tap ☁ Sync, paste the same token and this code.";
+      })
+      .catch(function(e){ info.textContent = "Couldn't create the sync store ("+e.message+"). Check the token has the gist scope."; });
+  }
+};
+if(GH_TOKEN && GIST_ID){ syncBtn("☁ Syncing…"); syncPull(); }
+setInterval(function(){ syncPull(); }, 45000);
 
 refresh();
 renderHours();
@@ -1110,7 +1409,7 @@ renderPlans();
 // restore the tab you were on before the last save/reload
 try{
   var savedTab = localStorage.getItem("ct365_tab");
-  if(savedTab==="hourly" || savedTab==="todos" || savedTab==="plans") showTab(savedTab);
+  if(savedTab==="daily" || savedTab==="hourly" || savedTab==="todos" || savedTab==="plans") showTab(savedTab);
 }catch(e){}
 })();
 </script>

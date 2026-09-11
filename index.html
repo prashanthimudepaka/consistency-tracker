@@ -156,6 +156,24 @@ tr.nowhour td.hourlbl{color:var(--accent);font-weight:700;box-shadow:inset 3px 0
 #notes li{margin:2px 0}
 #notes input.ncb{width:15px;height:15px;accent-color:var(--accent);vertical-align:-2px;margin-right:6px;cursor:pointer}
 #notes .ckd{text-decoration:line-through;color:var(--muted)}
+/* --- month spread (two notebook pages) --- */
+.spread{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:760px){.spread{grid-template-columns:1fr}}
+.page{background:var(--panel);border:1px solid var(--line);border-radius:6px 14px 14px 6px;padding:14px 16px 18px;box-shadow:inset 6px 0 12px -10px rgba(0,0,0,.25)}
+.page.right{border-radius:14px 6px 6px 14px;box-shadow:inset -6px 0 12px -10px rgba(0,0,0,.25)}
+.pagehead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:6px}
+.pagehead b{font-family:"Fraunces",Georgia,serif;font-size:18px;font-weight:700}
+.pagehead span{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.line{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);min-height:32px}
+.line.week{border-top:2px solid var(--muted)}
+.line.today{background:var(--accent-soft);margin:0 -8px;padding:0 8px;border-radius:4px}
+.line .d{width:22px;text-align:right;font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;color:var(--muted)}
+.line.today .d{color:var(--accent)}
+.line .wd{width:26px;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.line input{flex:1;border:0;background:transparent;font:inherit;font-size:14px;color:var(--ink);padding:6px 4px;outline:none;min-width:0}
+.line input:focus{background:var(--bg);border-radius:4px}
+.line input:disabled{color:var(--muted);cursor:not-allowed}
+.line.future .d,.line.future .wd{opacity:.6}
 /* --- home --- */
 .homehead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px}
 .homekicker{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700}
@@ -175,6 +193,8 @@ tr.nowhour td.hourlbl{color:var(--accent);font-weight:700;box-shadow:inset 3px 0
 .prio .num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
 .prio input{flex:1;font:inherit;font-size:14px;color:var(--ink);background:transparent;border:0;border-bottom:1px dashed var(--line);padding:5px 2px;outline:none}
 .prio input:focus{border-bottom-color:var(--accent)}
+.spin{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+.spin:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .bal{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:7px 0;font-size:13px}
 .dots{display:flex;gap:5px}
 .dot5{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--line);background:transparent;cursor:pointer;padding:0;transition:transform .1s}
@@ -284,6 +304,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
   <div class="tabs">
     <button id="tabbtn-home" class="active">🏠 Home</button>
     <button id="tabbtn-daily">Daily tracker</button>
+    <button id="tabbtn-spread">📖 Spread</button>
     <button id="tabbtn-hourly">Hourly log</button>
     <button id="tabbtn-todos">To-dos &amp; Notes</button>
     <button id="tabbtn-plans">🎨 Plans</button>
@@ -330,6 +351,21 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
 
   <div class="tablewrap"><table id="grid"></table></div>
   <div class="foot">Done counts 1, half counts 0.5. Stats measure days from Sep 11, 2026 through today. Edits save automatically.</div>
+  </div>
+
+  <div id="tab-spread" hidden>
+    <div class="toolbar">
+      <button id="sprev" aria-label="Previous month">‹ Prev</button>
+      <div class="month" id="slabel"></div>
+      <button id="snext" aria-label="Next month">Next ›</button>
+      <button id="sthis">This month</button>
+    </div>
+    <div class="legend">
+      <span class="k">📖 one notebook spread for the whole month — <b>left page: plan</b> (appointments, birthdays, dates) · <b>right page: log</b> (one honest line about each day)</span>
+      <span class="k">· thick rule = new week · log lines follow strict mode (today &amp; yesterday) 🔒</span>
+    </div>
+    <div class="spread" id="spread"></div>
+    <div class="foot">Keep it simple: one line per day. Plan on the left, remember on the right — your past, present and future on one spread.</div>
   </div>
 
   <div id="tab-hourly" hidden>
@@ -510,10 +546,10 @@ function doPublish(){
   document.getElementById("state").textContent = JSON.stringify(state).replace(/</g,"\\u003c");
   // serialize a CLONE so the live page (focus, open dialog, half-typed text) is never disturbed
   var clone = document.documentElement.cloneNode(true);
-  clone.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard,#home,#notes").forEach(function(el){ el.innerHTML=""; });
+  clone.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard,#home,#notes,#spread").forEach(function(el){ el.innerHTML=""; });
   clone.querySelectorAll(".floaty,#confetti").forEach(function(el){ el.remove(); });
   var dlg = clone.querySelector("#dlg"); if(dlg) dlg.hidden = true;
-  ["home","daily","hourly","todos","plans"].forEach(function(k){
+  ["home","daily","spread","hourly","todos","plans"].forEach(function(k){
     var pane = clone.querySelector("#tab-"+k), btn = clone.querySelector("#tabbtn-"+k);
     if(pane) pane.hidden = k!=="home";
     if(btn) btn.className = k==="home"?"active":"";
@@ -708,7 +744,7 @@ function isPerfect(dIso){
   return true;
 }
 
-function refresh(){ renderStats(); renderGrid(); renderHeatmap(); if(typeof renderHome==="function") renderHome(); }
+function refresh(){ renderStats(); renderGrid(); renderHeatmap(); if(typeof renderHome==="function") renderHome(); if(curTab==="spread" && typeof renderSpread==="function") renderSpread(); }
 
 // ---------- events ----------
 document.getElementById("grid").addEventListener("click", handleAct);
@@ -792,17 +828,19 @@ var curTab = "home";
 function showTab(t){
   curTab = t;
   try{ localStorage.setItem("ct365_tab", t); }catch(e){}
-  ["home","daily","hourly","todos","plans"].forEach(function(k){
+  ["home","daily","spread","hourly","todos","plans"].forEach(function(k){
     document.getElementById("tab-"+k).hidden = t!==k;
     document.getElementById("tabbtn-"+k).className = t===k?"active":"";
   });
   if(t==="home") renderHome();
+  if(t==="spread") renderSpread();
   if(t==="hourly") renderHours();
   if(t==="todos") renderTodos();
   if(t==="plans") renderPlans();
 }
 document.getElementById("tabbtn-home").onclick=function(){ showTab("home"); };
 document.getElementById("tabbtn-daily").onclick=function(){ showTab("daily"); };
+document.getElementById("tabbtn-spread").onclick=function(){ showTab("spread"); };
 document.getElementById("tabbtn-hourly").onclick=function(){ showTab("hourly"); };
 document.getElementById("tabbtn-todos").onclick=function(){ showTab("todos"); };
 document.getElementById("tabbtn-plans").onclick=function(){ showTab("plans"); };
@@ -1140,6 +1178,54 @@ document.querySelectorAll(".notebar button").forEach(function(b){
   });
 });
 
+// ---------- month spread: left page plans, right page one-line log ----------
+var spYM = null;
+function spreadMonth(){
+  if(!spYM){ var t = clampDate(today0()); spYM = [t.getFullYear(), t.getMonth()]; }
+  return spYM;
+}
+function renderSpread(){
+  var ym = spreadMonth(), y = ym[0], m = ym[1];
+  document.getElementById("slabel").textContent = MONTHS[m]+" "+y;
+  var today = today0(), end = addDays(START, DAYS-1), tIso = iso(today);
+  var plan = dayMap("plan"), log = dayMap("log");
+  function pageRows(kind){
+    var h = "";
+    for(var d = new Date(y,m,1); d.getMonth()===m; d = addDays(d,1)){
+      if(d<START || d>end) continue;
+      var dIso = iso(d), future = d>today, isToday = dIso===tIso;
+      var val = (kind==="plan" ? plan : log)[dIso]||"";
+      var locked = kind==="log" ? !editableDay(dIso) : (!future && !editableDay(dIso));
+      h += "<div class='line"+(d.getDay()===1?" week":"")+(isToday?" today":"")+(future?" future":"")+"'>"+
+        "<span class='d'>"+d.getDate()+"</span><span class='wd'>"+WD[d.getDay()]+"</span>"+
+        "<input data-k='"+kind+"' data-d='"+dIso+"' value=\""+esc(val)+"\""+(locked?" disabled title='Locked — strict mode'":"")+
+        " placeholder='"+(isToday ? (kind==="plan"?"today's plan…":"one line about today…") : "")+"' aria-label='"+dIso+" "+kind+"'></div>";
+    }
+    return h;
+  }
+  document.getElementById("spread").innerHTML =
+    "<div class='page'><div class='pagehead'><b>"+MONTHS[m]+"</b><span>Plan · what's coming</span></div>"+pageRows("plan")+"</div>"+
+    "<div class='page right'><div class='pagehead'><b>"+MONTHS[m]+"</b><span>Log · what happened</span></div>"+pageRows("log")+"</div>";
+}
+document.getElementById("spread").addEventListener("change", function(e){
+  var inp = e.target.closest("input[data-k]"); if(!inp) return;
+  var k = inp.dataset.k, dIso = inp.dataset.d, v = inp.value.trim();
+  if(k==="log" && !editableDay(dIso)){ lockedMsg(dIso); renderSpread(); return; }
+  if(v) dayMap(k)[dIso] = v; else delete dayMap(k)[dIso];
+  scheduleSave(); if(curTab==="home") renderHome();
+});
+function moveSpread(n){
+  var ym = spreadMonth();
+  var d = new Date(ym[0], ym[1]+n, 1);
+  var lo = new Date(START.getFullYear(), START.getMonth(), 1);
+  var endD = addDays(START, DAYS-1), hi = new Date(endD.getFullYear(), endD.getMonth(), 1);
+  if(d<lo) d=lo; if(d>hi) d=hi;
+  spYM = [d.getFullYear(), d.getMonth()]; renderSpread();
+}
+document.getElementById("sprev").onclick=function(){ moveSpread(-1); };
+document.getElementById("snext").onclick=function(){ moveSpread(1); };
+document.getElementById("sthis").onclick=function(){ spYM = null; renderSpread(); };
+
 // ---------- home: "What matters today?" ----------
 var AREAS = [["🎓","Career"],["💪","Health"],["🧠","Mind"],["🙏","Spiritual"],["❤️","Relationships"],["💰","Money"],["🌸","Joy"]];
 function dayMap(key){ if(!state[key]) state[key] = {}; return state[key]; }
@@ -1191,6 +1277,11 @@ function renderHome(){
     return "<div class='bal'><span>"+a[0]+" "+a[1]+"</span><span class='dots'>"+[1,2,3,4,5].map(function(n){
       return "<button class='dot5"+(n<=(bal[i]||0)?" on":"")+"' data-a='"+i+"' data-v='"+n+"' title='"+a[1]+" "+n+"/5'></button>"; }).join("")+"</span></div>";
   }).join("")+"</div>";
+  // today on the spread: plan + one-line log
+  var pl = dayMap("plan")[tIso]||"", lg = dayMap("log")[tIso]||"";
+  h += "<div class='hcard'><h4>📖 Today on the spread<button class='go' data-tab='spread'>Open spread →</button></h4>"+
+    "<div class='hmuted' style='margin-bottom:4px'>Plan</div><input class='spin' data-k='plan' value=\""+esc(pl)+"\" placeholder='Appointments, dates, anything time-bound…'>"+
+    "<div class='hmuted' style='margin:10px 0 4px'>One line about today</div><input class='spin' data-k='log' value=\""+esc(lg)+"\" placeholder='What happened, how it felt, or just the vibe'></div>";
   // quick notes
   h += "<div class='hcard'><h4>📝 Quick notes</h4><textarea id='quick' placeholder='Anything on your mind…'>"+esc(dayMap("quick")[tIso]||"")+"</textarea></div>";
   // one reminder
@@ -1216,6 +1307,10 @@ document.getElementById("home").addEventListener("change", function(e){
   var tIso = iso(new Date());
   if(e.target.classList.contains("pri")){
     var pr = dayMap("priorities")[tIso]||["","",""]; pr[+e.target.dataset.i] = e.target.value.trim(); dayMap("priorities")[tIso] = pr; scheduleSave();
+  } else if(e.target.classList.contains("spin")){
+    var k = e.target.dataset.k, v0 = e.target.value.trim();
+    if(v0) dayMap(k)[tIso] = v0; else delete dayMap(k)[tIso];
+    scheduleSave();
   } else if(e.target.id==="quick"){
     var q = e.target.value; if(q.trim()) dayMap("quick")[tIso]=q; else delete dayMap("quick")[tIso]; scheduleSave();
   } else if(e.target.id==="remind"){
@@ -1409,7 +1504,7 @@ renderPlans();
 // restore the tab you were on before the last save/reload
 try{
   var savedTab = localStorage.getItem("ct365_tab");
-  if(savedTab==="daily" || savedTab==="hourly" || savedTab==="todos" || savedTab==="plans") showTab(savedTab);
+  if(["daily","spread","hourly","todos","plans"].indexOf(savedTab)>=0) showTab(savedTab);
 }catch(e){}
 })();
 </script>

@@ -185,8 +185,24 @@ tr.nowhour td.hourlbl{color:var(--accent);font-weight:700;box-shadow:inset 3px 0
 .hkey i{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)}
 #simplebtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 body.simple .tabs button{display:none}
-body.simple .tabs button#tabbtn-home,body.simple .tabs button#tabbtn-spread{display:inline-block}
+body.simple .tabs button#tabbtn-home,body.simple .tabs button#tabbtn-spread,body.simple .tabs button#tabbtn-jar{display:inline-block}
 body.simple .hcard.hideable{display:none}
+/* --- sand jar --- */
+.jarwrap{display:grid;grid-template-columns:auto 1fr;gap:26px;align-items:start}
+@media (max-width:640px){.jarwrap{grid-template-columns:1fr;justify-items:center}}
+.jarpanel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;justify-content:center}
+#jarcanvas{max-width:100%;height:auto;display:block}
+.jarside{display:flex;flex-direction:column;gap:12px;max-width:440px;width:100%}
+.jartime{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:56px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.jartime.done{color:var(--accent)}
+.jarpresets{display:flex;flex-wrap:wrap;gap:6px}
+.jarpresets button{border-radius:999px;padding:5px 13px;font-size:13px}
+.jarpresets button.active{background:var(--half);border-color:var(--half);color:#fff}
+.jarbtns{display:flex;gap:8px;flex-wrap:wrap}
+#jarfocus{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+#jarfocus:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.jarstats{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}
+.jarstats .jarpip{font-size:18px}
 /* --- home --- */
 .homehead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px}
 .homekicker{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700}
@@ -319,6 +335,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
     <button id="tabbtn-home" class="active">🏠 Home</button>
     <button id="tabbtn-daily">Daily tracker</button>
     <button id="tabbtn-spread">📖 Spread</button>
+    <button id="tabbtn-jar">⏳ Sand jar</button>
     <button id="tabbtn-hourly">Hourly log</button>
     <button id="tabbtn-todos">To-dos &amp; Notes</button>
     <button id="tabbtn-plans">🎨 Plans</button>
@@ -382,6 +399,28 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
     </div>
     <div class="spread" id="spread"></div>
     <div class="foot">Keep it simple: one line per day. Plan on the left, remember on the right — your past, present and future on one spread.</div>
+  </div>
+
+  <div id="tab-jar" hidden>
+    <div class="jarwrap">
+      <div class="jarpanel">
+        <canvas id="jarcanvas" width="260" height="360" aria-label="Sand jar timer"></canvas>
+      </div>
+      <div class="jarside">
+        <div class="homekicker">One thing, until the jar is full</div>
+        <div class="jartime" id="jartime">30:00</div>
+        <div class="hmuted" id="jarstatus">Pick a length, press Start, and give the jar your full attention.</div>
+        <div class="jarpresets" id="jarpresets"></div>
+        <div class="jarbtns">
+          <button id="jarstart" class="primary">▶ Start</button>
+          <button id="jarpause" hidden>⏸ Pause</button>
+          <button id="jarreset">↺ Reset</button>
+        </div>
+        <input id="jarfocus" placeholder="What are you focusing on? (optional)" aria-label="Focus label">
+        <div class="jarstats" id="jarstats"></div>
+      </div>
+    </div>
+    <div class="foot">Each finished jar counts as one focus session for the day. Pausing keeps the sand where it is; resetting empties the jar.</div>
   </div>
 
   <div id="tab-hourly" hidden>
@@ -565,7 +604,7 @@ function doPublish(){
   clone.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard,#home,#notes,#spread").forEach(function(el){ el.innerHTML=""; });
   clone.querySelectorAll(".floaty,#confetti").forEach(function(el){ el.remove(); });
   var dlg = clone.querySelector("#dlg"); if(dlg) dlg.hidden = true;
-  ["home","daily","spread","hourly","todos","plans"].forEach(function(k){
+  ["home","daily","spread","jar","hourly","todos","plans"].forEach(function(k){
     var pane = clone.querySelector("#tab-"+k), btn = clone.querySelector("#tabbtn-"+k);
     if(pane) pane.hidden = k!=="home";
     if(btn) btn.className = k==="home"?"active":"";
@@ -844,12 +883,13 @@ var curTab = "home";
 function showTab(t){
   curTab = t;
   try{ localStorage.setItem("ct365_tab", t); }catch(e){}
-  ["home","daily","spread","hourly","todos","plans"].forEach(function(k){
+  ["home","daily","spread","jar","hourly","todos","plans"].forEach(function(k){
     document.getElementById("tab-"+k).hidden = t!==k;
     document.getElementById("tabbtn-"+k).className = t===k?"active":"";
   });
   if(t==="home") renderHome();
   if(t==="spread") renderSpread();
+  if(t==="jar") jarWake();
   if(t==="hourly") renderHours();
   if(t==="todos") renderTodos();
   if(t==="plans") renderPlans();
@@ -857,6 +897,7 @@ function showTab(t){
 document.getElementById("tabbtn-home").onclick=function(){ showTab("home"); };
 document.getElementById("tabbtn-daily").onclick=function(){ showTab("daily"); };
 document.getElementById("tabbtn-spread").onclick=function(){ showTab("spread"); };
+document.getElementById("tabbtn-jar").onclick=function(){ showTab("jar"); };
 document.getElementById("tabbtn-hourly").onclick=function(){ showTab("hourly"); };
 document.getElementById("tabbtn-todos").onclick=function(){ showTab("todos"); };
 document.getElementById("tabbtn-plans").onclick=function(){ showTab("plans"); };
@@ -1256,7 +1297,7 @@ function applySimple(){
   document.body.classList.toggle("simple", on);
   document.getElementById("simplebtn").className = on ? "on" : "";
   document.getElementById("simplebtn").textContent = on ? "🧘 Simple mode on" : "🧘 Simple mode";
-  if(on && curTab!=="home" && curTab!=="spread") showTab("home");
+  if(on && curTab!=="home" && curTab!=="spread" && curTab!=="jar") showTab("home");
 }
 document.getElementById("simplebtn").onclick = function(){
   if(!state.ui) state.ui = {};
@@ -1282,6 +1323,130 @@ function moveSpread(n){
 document.getElementById("sprev").onclick=function(){ moveSpread(-1); };
 document.getElementById("snext").onclick=function(){ moveSpread(1); };
 document.getElementById("sthis").onclick=function(){ spYM = null; renderSpread(); };
+
+// ---------- sand jar: a 30-minute (or any length) single-focus timer ----------
+var JAR_PRESETS = [15,25,30,45,60];
+function jarState(){
+  if(!state.ui) state.ui = {};
+  if(!state.ui.jar) state.ui.jar = {dur:1800000, end:null, remain:null, label:""};
+  return state.ui.jar;
+}
+function jarRemaining(){
+  var j = jarState();
+  if(j.end) return Math.max(0, j.end - Date.now());
+  if(j.remain!=null) return j.remain;
+  return j.dur;
+}
+function jarProgress(){ var j=jarState(); return 1 - jarRemaining()/j.dur; }
+var jarRaf = null, jarGrains = [], jarDone = false;
+function jarRender(){
+  var j = jarState(), rem = jarRemaining(), prog = Math.min(1, Math.max(0, jarProgress()));
+  var mm = Math.floor(rem/60000), ss = Math.floor(rem%60000/1000);
+  var t = document.getElementById("jartime");
+  t.textContent = (mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss;
+  t.className = "jartime"+(rem===0 && j.dur ? " done" : "");
+  document.getElementById("jarpresets").innerHTML = JAR_PRESETS.map(function(m){
+    return "<button data-m='"+m+"' class='"+(j.dur===m*60000?"active":"")+"'>"+m+" min</button>";
+  }).join("")+"<button data-m='custom'>Custom…</button>";
+  var running = !!j.end;
+  document.getElementById("jarstart").hidden = running;
+  document.getElementById("jarpause").hidden = !running;
+  document.getElementById("jarstatus").textContent = running
+    ? "Sand is falling"+(j.label?" — "+j.label:"")+". Stay with it."
+    : (j.remain!=null ? "Paused — the sand waits for you." : "Pick a length, press Start, and give the jar your full attention.");
+  var n = dayMap("jars")[iso(new Date())]||0;
+  document.getElementById("jarstats").innerHTML = "<span>Jars filled today:</span> "+(n ? "<span class='jarpip'>"+"⏳".repeat(Math.min(n,12))+"</span> <b>"+n+"</b>" : "<b>0</b>");
+  var fi = document.getElementById("jarfocus"); if(fi.value !== (j.label||"") && document.activeElement!==fi) fi.value = j.label||"";
+  jarDraw(prog, running);
+}
+function jarDraw(prog, running){
+  var cv = document.getElementById("jarcanvas"), ctx = cv.getContext("2d");
+  var W = cv.width, H = cv.height;
+  ctx.clearRect(0,0,W,H);
+  var css = getComputedStyle(document.documentElement);
+  var line = css.getPropertyValue("--line").trim()||"#DCE2DA", ink = css.getPropertyValue("--ink").trim()||"#243029";
+  var sand = css.getPropertyValue("--half").trim()||"#C98A2D", sandLight = "#E6C17A";
+  // jar body
+  var jx=40, jy=70, jw=W-80, jh=H-95, r=26;
+  ctx.lineWidth = 3; ctx.strokeStyle = ink; ctx.globalAlpha = .85;
+  ctx.beginPath();
+  ctx.moveTo(jx+18, jy); ctx.lineTo(jx+jw-18, jy);           // rim
+  ctx.quadraticCurveTo(jx+jw, jy, jx+jw, jy+22);
+  ctx.lineTo(jx+jw, jy+jh-r); ctx.quadraticCurveTo(jx+jw, jy+jh, jx+jw-r, jy+jh);
+  ctx.lineTo(jx+r, jy+jh); ctx.quadraticCurveTo(jx, jy+jh, jx, jy+jh-r);
+  ctx.lineTo(jx, jy+22); ctx.quadraticCurveTo(jx, jy, jx+18, jy);
+  ctx.closePath(); ctx.stroke();
+  // lid
+  ctx.fillStyle = ink; ctx.globalAlpha=.9; ctx.fillRect(jx+14, jy-14, jw-28, 12);
+  ctx.globalAlpha = 1;
+  // sand pile: fill from bottom, slightly domed
+  var fillH = (jh-8)*prog;
+  if(fillH>0){
+    ctx.save(); ctx.beginPath();
+    ctx.moveTo(jx+3, jy+jh-3); ctx.lineTo(jx+jw-3, jy+jh-3);
+    ctx.lineTo(jx+jw-3, jy+jh-3-fillH+6);
+    ctx.quadraticCurveTo(jx+jw/2, jy+jh-3-fillH-10, jx+3, jy+jh-3-fillH+6);
+    ctx.closePath();
+    var g = ctx.createLinearGradient(0, jy+jh-fillH, 0, jy+jh);
+    g.addColorStop(0, sandLight); g.addColorStop(1, sand);
+    ctx.fillStyle = g; ctx.fill(); ctx.restore();
+  }
+  // funnel + falling stream while running
+  if(running && prog<1){
+    ctx.fillStyle = sand; ctx.globalAlpha=.9;
+    ctx.beginPath(); ctx.moveTo(W/2-22, 10); ctx.lineTo(W/2+22, 10); ctx.lineTo(W/2+4, 44); ctx.lineTo(W/2-4, 44); ctx.closePath(); ctx.fill();
+    // remaining sand in funnel shrinks
+    ctx.fillStyle = "#F6F7F3"; ctx.globalAlpha=.55;
+    ctx.fillRect(W/2-22, 10, 44, 34*prog);
+    ctx.globalAlpha = 1;
+    // grains
+    var surfaceY = jy+jh-3-fillH;
+    if(jarGrains.length<38) jarGrains.push({x:W/2+(Math.random()-.5)*6, y:44, v:2+Math.random()*3, s:1.5+Math.random()*1.8});
+    ctx.fillStyle = sand;
+    jarGrains.forEach(function(gr){ gr.y += gr.v; gr.v += .35; ctx.beginPath(); ctx.arc(gr.x, gr.y, gr.s, 0, 6.283); ctx.fill(); });
+    jarGrains = jarGrains.filter(function(gr){ return gr.y < surfaceY-2; });
+  } else jarGrains = [];
+  // percent label on the glass
+  ctx.fillStyle = ink; ctx.globalAlpha=.55; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.textAlign="center";
+  ctx.fillText(Math.round(prog*100)+"%", W/2, jy+jh+20); ctx.globalAlpha=1;
+}
+function jarTick(){
+  jarRaf = null;
+  var j = jarState();
+  if(j.end && Date.now() >= j.end && !jarDone){
+    jarDone = true; j.end = null; j.remain = 0;
+    var tIso = iso(new Date()); dayMap("jars")[tIso] = (dayMap("jars")[tIso]||0)+1;
+    confetti(); floaty("⏳ Jar full — well done", innerWidth/2, innerHeight/3); try{ beep(); }catch(e){}
+    scheduleSave(); if(curTab==="home") renderHome();
+  }
+  jarRender();
+  if(curTab==="jar" && (j.end || jarGrains.length)) jarRaf = requestAnimationFrame(jarTick);
+}
+function jarWake(){ jarDone = false; jarRender(); if(!jarRaf) jarRaf = requestAnimationFrame(jarTick); }
+document.getElementById("jarpresets").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-m]"); if(!b) return;
+  var j = jarState();
+  function setDur(min){ j.dur = Math.round(min*60000); j.end = null; j.remain = null; jarDone=false; jarRender(); scheduleSave(); }
+  if(b.dataset.m==="custom"){
+    askText("Jar length — minutes", String(j.dur/60000), function(v){ var m=parseFloat(v); if(v!==null && m>0 && m<=240) setDur(m); }, null, true);
+  } else setDur(+b.dataset.m);
+});
+document.getElementById("jarstart").onclick = function(){
+  var j = jarState(); var rem = (j.remain!=null && j.remain>0) ? j.remain : j.dur;
+  j.end = Date.now() + rem; j.remain = null; jarDone = false;
+  j.label = document.getElementById("jarfocus").value.trim();
+  scheduleSave(); jarWake();
+};
+document.getElementById("jarpause").onclick = function(){
+  var j = jarState(); if(!j.end) return;
+  j.remain = Math.max(0, j.end - Date.now()); j.end = null; scheduleSave(); jarRender();
+};
+document.getElementById("jarreset").onclick = function(){
+  var j = jarState(); j.end = null; j.remain = null; jarDone = false; jarGrains = []; scheduleSave(); jarRender();
+};
+document.getElementById("jarfocus").addEventListener("change", function(){ jarState().label = this.value.trim(); scheduleSave(); });
+// keep counting even when another tab is open (the 1 s interval below also checks completion)
+var jarBgTimer = setInterval(function(){ var j = state.ui && state.ui.jar; if(j && j.end && Date.now()>=j.end && !jarDone) jarTick(); }, 1000);
 
 // ---------- home: "What matters today?" ----------
 var AREAS = [["🎓","Career"],["💪","Health"],["🧠","Mind"],["🙏","Spiritual"],["❤️","Relationships"],["💰","Money"],["🌸","Joy"]];
@@ -1339,6 +1504,11 @@ function renderHome(){
   h += "<div class='hcard'><h4>📖 Today on the spread<button class='go' data-tab='spread'>Open spread →</button></h4>"+
     "<div class='hmuted' style='margin-bottom:4px'>Plan</div><input class='spin' data-k='plan' value=\""+esc(pl)+"\" placeholder='Appointments, dates, anything time-bound…'>"+
     "<div class='hmuted' style='margin:10px 0 4px'>One line about today</div><input class='spin' data-k='log' value=\""+esc(lg)+"\" placeholder='What happened, how it felt, or just the vibe'></div>";
+  // focus jars today
+  var jarsN = dayMap("jars")[tIso]||0;
+  h += "<div class='hcard hideable'><h4>⏳ Focus jars<span class='n'>"+jarsN+" today</span><button class='go' data-tab='jar'>Start a jar →</button></h4>"+
+    (jarsN ? "<div style='font-size:22px;letter-spacing:2px'>"+"⏳".repeat(Math.min(jarsN,12))+"</div><div class='hmuted'>"+(jarsN*((state.ui&&state.ui.jar&&state.ui.jar.dur)||1800000)/60000|0)+" focused minutes, give or take</div>"
+           : "<div class='hmuted'>No jars filled yet today. Thirty quiet minutes on one thing is a good start.</div>")+"</div>";
   // quick notes
   h += "<div class='hcard hideable'><h4>📝 Quick notes</h4><textarea id='quick' placeholder='Anything on your mind…'>"+esc(dayMap("quick")[tIso]||"")+"</textarea></div>";
   // one reminder
@@ -1562,7 +1732,7 @@ applySimple();
 // restore the tab you were on before the last save/reload
 try{
   var savedTab = localStorage.getItem("ct365_tab");
-  if(["daily","spread","hourly","todos","plans"].indexOf(savedTab)>=0) showTab(savedTab);
+  if(["daily","spread","jar","hourly","todos","plans"].indexOf(savedTab)>=0) showTab(savedTab);
 }catch(e){}
 })();
 </script>

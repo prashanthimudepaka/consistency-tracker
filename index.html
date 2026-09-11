@@ -203,6 +203,58 @@ body.simple .hcard.hideable{display:none}
 #jarfocus:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .jarstats{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}
 .jarstats .jarpip{font-size:18px}
+/* --- mindful habits --- */
+#habitgrid{min-width:720px}
+#habitgrid th.hname{text-align:left;padding-left:12px;min-width:230px}
+#habitgrid th.dayh{font-size:11px;font-weight:600;color:var(--muted);min-width:56px}
+#habitgrid th.dayh b{display:block;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+#habitgrid th.dayh.today b{color:var(--accent)}
+#habitgrid th.dayh.today{box-shadow:inset 0 -3px 0 var(--accent)}
+tr.catrow td{background:var(--bg);text-align:left;padding:8px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+td.hn{text-align:left;padding:8px 12px;font-size:14px}
+td.hn .e{margin-right:6px}
+td.hn .nm{cursor:text;border-radius:4px;padding:1px 4px}
+td.hn .nm:hover{background:var(--accent-soft)}
+td.hn .tip{display:block;font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35}
+td.hn .hx{border:0;background:none;color:var(--muted);font-size:11px;padding:0 4px;opacity:0;cursor:pointer}
+tr:hover td.hn .hx{opacity:1}
+td.hn .hx:hover{color:var(--miss)}
+td.hc{cursor:pointer;height:40px;font-weight:700;font-size:14px;user-select:none;transition:transform .12s ease,background .15s ease}
+td.hc:hover{background:var(--accent-soft)}
+td.hc:active{transform:scale(1.15)}
+td.hc.done{background:var(--done-bg);color:var(--done)}
+td.hc.partial{background:var(--half-bg);color:var(--half)}
+td.hc.locked{cursor:not-allowed;color:var(--muted);font-weight:400}
+td.hc.locked:hover{background:inherit}
+td.hc small{display:block;font-size:10px;font-weight:600;opacity:.8}
+td.hstat{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;padding:0 10px}
+td.hstat b{color:var(--ink)}
+.jgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.jgrid label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.jgrid textarea,.jgrid input{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.jgrid textarea{min-height:88px;resize:vertical;line-height:1.5}
+.jgrid textarea:focus,.jgrid input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.jgrid input:disabled,.jgrid textarea:disabled{color:var(--muted);cursor:not-allowed}
+.hbrow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:14px}
+.hbrow:last-child{border-bottom:0}
+.hbrow input{width:17px;height:17px;accent-color:var(--accent);flex:none}
+.hbrow.done span{color:var(--muted)}
+/* --- images & quotes --- */
+.hero{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;overflow:hidden}
+@media (max-width:640px){.hero{grid-template-columns:1fr}.hero svg{max-width:220px}}
+.hero h3{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:20px;margin:0 0 6px;letter-spacing:-.01em}
+.hero p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55;max-width:60ch}
+.hero svg{display:block;width:260px;height:auto}
+.quote{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px 14px 22px;margin-bottom:14px;border-left:4px solid var(--accent)}
+.quote .qmark{position:absolute;top:2px;left:12px;font-family:"Fraunces",Georgia,serif;font-size:44px;line-height:1;color:var(--accent);opacity:.25}
+.quote blockquote{margin:0 0 6px;font-family:"Fraunces",Georgia,serif;font-size:18px;line-height:1.4;font-style:italic;text-wrap:balance}
+.quote cite{display:block;font-size:12px;color:var(--muted);font-style:normal;letter-spacing:.04em}
+.quote .qbtns{position:absolute;top:10px;right:10px;display:flex;gap:4px}
+.quote .qbtns button{border:0;background:none;color:var(--muted);font-size:12px;padding:3px 7px;border-radius:5px}
+.quote .qbtns button:hover{background:var(--accent-soft);color:var(--accent)}
+tr.catrow td .cart{vertical-align:middle;margin-right:8px}
+.homequote{display:flex;flex-direction:column;align-items:center;gap:6px}
+.homequote svg{width:120px;height:auto;opacity:.9}
 /* --- home --- */
 .homehead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px}
 .homekicker{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700}
@@ -336,6 +388,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
     <button id="tabbtn-daily">Daily tracker</button>
     <button id="tabbtn-spread">📖 Spread</button>
     <button id="tabbtn-jar">⏳ Sand jar</button>
+    <button id="tabbtn-habits">🌿 Habits</button>
     <button id="tabbtn-hourly">Hourly log</button>
     <button id="tabbtn-todos">To-dos &amp; Notes</button>
     <button id="tabbtn-plans">🎨 Plans</button>
@@ -349,8 +402,16 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
       </div>
       <div class="homebal" id="homebal"></div>
     </div>
+    <div class="quote" id="homequote"></div>
     <div class="home" id="home"></div>
-    <div class="homequote">Today doesn't need to be perfect. What matters is moving forward.</div>
+    <div class="homequote">
+      <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 52c20 0 26-24 44-24s26 20 40 20 20-10 28-16" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="116" cy="32" r="4" fill="var(--half)"/>
+        <g fill="var(--accent)" opacity=".5"><circle cx="48" cy="28" r="2.5"/><circle cx="88" cy="48" r="2.5"/></g>
+      </svg>
+      <span>Today doesn't need to be perfect. What matters is moving forward.</span>
+    </div>
   </div>
 
   <div id="tab-daily" hidden>
@@ -421,6 +482,47 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
       </div>
     </div>
     <div class="foot">Each finished jar counts as one focus session for the day. Pausing keeps the sand where it is; resetting empties the jar.</div>
+  </div>
+
+  <div id="tab-habits" hidden>
+    <div class="toolbar">
+      <button id="hbprev" aria-label="Previous week">‹ Week</button>
+      <div class="daylabel" id="hblabel" style="min-width:250px"></div>
+      <button id="hbnext" aria-label="Next week">Week ›</button>
+      <button id="hbthis">This week</button>
+      <div class="spacer"></div>
+      <button id="hbadd" class="primary">+ Add habit</button>
+    </div>
+    <div class="legend">
+      <span class="k">🌿 ten mindful habits — do less to achieve more · click a square to mark the day · click a habit name to rename · hover for the why</span>
+      <span class="k">· 🛡️ protects attention · 🌀 creates processing time · 🧭 removes decisions in advance · strict mode applies 🔒</span>
+    </div>
+    <div class="hero">
+      <div>
+        <h3>Do less, achieve more.</h3>
+        <p>Ten small habits, each doing one of three jobs: protecting your attention, giving your mind time to process, or removing a decision before it costs you anything. Mark the square when you did it. The streaks take care of themselves.</p>
+      </div>
+      <svg viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs><linearGradient id="hgSand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6C17A"/><stop offset="1" stop-color="#C98A2D"/></linearGradient></defs>
+        <ellipse cx="130" cy="186" rx="96" ry="8" fill="currentColor" opacity=".08"/>
+        <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M92 24h76M92 178h76"/>
+          <path d="M100 30c0 44 24 56 30 70-6 14-30 26-30 70M160 30c0 44-24 56-30 70 6 14 30 26 30 70"/>
+        </g>
+        <path d="M108 40c0 30 16 40 22 52 6-12 22-22 22-52z" fill="url(#hgSand)" opacity=".9"/>
+        <path d="M104 170c0-22 14-30 26-42 12 12 26 20 26 42z" fill="url(#hgSand)"/>
+        <g fill="#C98A2D"><circle cx="130" cy="112" r="1.8"/><circle cx="129" cy="124" r="1.6"/><circle cx="131" cy="136" r="1.8"/><circle cx="130" cy="148" r="1.5"/></g>
+        <g fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" opacity=".85">
+          <path d="M28 150c10-18 22-26 36-24"/><path d="M24 160c16-4 30 0 40 12"/>
+          <path d="M232 150c-10-18-22-26-36-24"/><path d="M236 160c-16-4-30 0-40 12"/>
+        </g>
+        <g fill="var(--accent)" opacity=".9"><circle cx="40" cy="126" r="4"/><circle cx="220" cy="126" r="4"/><circle cx="58" cy="112" r="2.5"/><circle cx="202" cy="112" r="2.5"/></g>
+      </svg>
+    </div>
+    <div class="quote" id="hquote"></div>
+    <div class="tablewrap"><table id="habitgrid"></table></div>
+    <div class="hcard" id="journalcard" style="margin-top:16px"></div>
+    <div class="foot">Every habit here does one of three things: protects your attention, gives you time to process, or removes a decision before it costs you anything.</div>
   </div>
 
   <div id="tab-hourly" hidden>
@@ -601,10 +703,10 @@ function doPublish(){
   document.getElementById("state").textContent = JSON.stringify(state).replace(/</g,"\\u003c");
   // serialize a CLONE so the live page (focus, open dialog, half-typed text) is never disturbed
   var clone = document.documentElement.cloneNode(true);
-  clone.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard,#home,#notes,#spread").forEach(function(el){ el.innerHTML=""; });
+  clone.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard,#home,#notes,#spread,#habitgrid,#journalcard").forEach(function(el){ el.innerHTML=""; });
   clone.querySelectorAll(".floaty,#confetti").forEach(function(el){ el.remove(); });
   var dlg = clone.querySelector("#dlg"); if(dlg) dlg.hidden = true;
-  ["home","daily","spread","jar","hourly","todos","plans"].forEach(function(k){
+  ["home","daily","spread","jar","habits","hourly","todos","plans"].forEach(function(k){
     var pane = clone.querySelector("#tab-"+k), btn = clone.querySelector("#tabbtn-"+k);
     if(pane) pane.hidden = k!=="home";
     if(btn) btn.className = k==="home"?"active":"";
@@ -884,13 +986,14 @@ function showTab(t){
   if(state.ui && state.ui.simple && t!=="home" && t!=="spread" && t!=="jar") t = "home";
   curTab = t;
   try{ localStorage.setItem("ct365_tab", t); }catch(e){}
-  ["home","daily","spread","jar","hourly","todos","plans"].forEach(function(k){
+  ["home","daily","spread","jar","habits","hourly","todos","plans"].forEach(function(k){
     document.getElementById("tab-"+k).hidden = t!==k;
     document.getElementById("tabbtn-"+k).className = t===k?"active":"";
   });
   if(t==="home") renderHome();
   if(t==="spread") renderSpread();
   if(t==="jar") jarWake();
+  if(t==="habits") renderHabits();
   if(t==="hourly") renderHours();
   if(t==="todos") renderTodos();
   if(t==="plans") renderPlans();
@@ -899,6 +1002,7 @@ document.getElementById("tabbtn-home").onclick=function(){ showTab("home"); };
 document.getElementById("tabbtn-daily").onclick=function(){ showTab("daily"); };
 document.getElementById("tabbtn-spread").onclick=function(){ showTab("spread"); };
 document.getElementById("tabbtn-jar").onclick=function(){ showTab("jar"); };
+document.getElementById("tabbtn-habits").onclick=function(){ showTab("habits"); };
 document.getElementById("tabbtn-hourly").onclick=function(){ showTab("hourly"); };
 document.getElementById("tabbtn-todos").onclick=function(){ showTab("todos"); };
 document.getElementById("tabbtn-plans").onclick=function(){ showTab("plans"); };
@@ -1062,7 +1166,7 @@ setInterval(function(){
     if(todoIso()===lastTodayIso) todoDate = today0();
     if(iso(hourDate)===lastTodayIso) hourDate = today0();
     lastTodayIso = nowIso;
-    refresh(); if(curTab==="todos") renderTodos(); if(curTab==="hourly") renderHours();
+    renderQuotes(); refresh(); if(curTab==="todos") renderTodos(); if(curTab==="hourly") renderHours();
   }
   var list = state.todos||[];
   // timers finish even if another tab is open
@@ -1326,6 +1430,212 @@ document.getElementById("sprev").onclick=function(){ moveSpread(-1); };
 document.getElementById("snext").onclick=function(){ moveSpread(1); };
 document.getElementById("sthis").onclick=function(){ spYM = null; renderSpread(); };
 
+// ---------- quotes: one a day, plus your own ----------
+var CAT_ART = {
+  attn: "<svg class='cart' width='26' height='26' viewBox='0 0 26 26' aria-hidden='true'><path d='M13 2l9 3v7c0 6-4 10-9 12-5-2-9-6-9-12V5z' fill='var(--accent-soft)' stroke='var(--accent)' stroke-width='1.6'/><path d='M8.5 13l3 3 6-6' fill='none' stroke='var(--accent)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>",
+  proc: "<svg class='cart' width='26' height='26' viewBox='0 0 26 26' aria-hidden='true'><circle cx='13' cy='13' r='10' fill='var(--half-bg)' stroke='var(--half)' stroke-width='1.6'/><path d='M13 6c4 0 6 3 6 6s-3 5-6 5-4-2-4-4 2-3 4-3 3 1 3 2' fill='none' stroke='var(--half)' stroke-width='1.6' stroke-linecap='round'/></svg>",
+  decide: "<svg class='cart' width='26' height='26' viewBox='0 0 26 26' aria-hidden='true'><circle cx='13' cy='13' r='10' fill='var(--bg)' stroke='var(--ink)' stroke-width='1.6' opacity='.8'/><path d='M13 5v3M13 18v3M5 13h3M18 13h3' stroke='var(--ink)' stroke-width='1.4' opacity='.6'/><path d='M16.5 9.5l-2 5-5 2 2-5z' fill='var(--miss)' opacity='.85'/></svg>"
+};
+var QUOTES = [
+  ["To achieve more, do less.", "the through-line of the ten habits"],
+  ["The falling sand is a reminder: these are moments of your life, flowing away. Spend them on purpose.", "on the hourglass"],
+  ["Protect your attention. It is the only thing you truly spend.", "mindful habits"],
+  ["Nothing interrupts the hourglass — unless the house is on fire.", "on single-tasking"],
+  ["Your brain, like every other part of you, needs rest to process what you feed it.", "on consuming less"],
+  ["Abstaining is easier than moderating.", "on quitting alcohol"],
+  ["Remove the decision before it costs you anything.", "on planning tomorrow's food tonight"],
+  ["Walk without audio. The quiet is where the day gets processed.", "on the evening walk"],
+  ["Focus on the positives and let them ruminate overnight.", "on reflective journaling"],
+  ["Capture it; don't trust recall.", "on screenshotting everything"],
+  ["Small things, done daily, become who you are.", ""],
+  ["Consistency is quieter than motivation, and it lasts longer.", ""],
+  ["Today doesn't need to be perfect. What matters is moving forward.", ""],
+  ["What gets logged gets noticed. What gets noticed gets better.", ""],
+  ["Start simple. Expand only when the simple thing is full.", "on the one-spread notebook"]
+];
+function allQuotes(){ return QUOTES.concat((state.quotes||[]).map(function(q){ return [q.t, q.by||"you"]; })); }
+function quoteOfDay(){
+  var qs = allQuotes(), pin = state.ui && state.ui.pinQuote;
+  if(pin!=null && qs[pin]) return qs[pin];
+  var idx = dayIndex(clampDate(today0())) % qs.length;
+  return qs[idx];
+}
+function renderQuotes(){
+  var q = quoteOfDay(), pinned = state.ui && state.ui.pinQuote!=null;
+  var html = "<span class='qmark'>“</span><blockquote>"+esc(q[0])+"</blockquote>"+(q[1]?"<cite>— "+esc(q[1])+"</cite>":"")+
+    "<div class='qbtns'><button data-q='pin' title='"+(pinned?"Unpin — go back to a new quote each day":"Pin this quote so it stays")+"'>"+(pinned?"📌 pinned":"📌")+"</button><button data-q='add' title='Add a quote of your own'>+ quote</button></div>";
+  ["homequote","hquote"].forEach(function(id){ var el = document.getElementById(id); if(el) el.innerHTML = html; });
+}
+function quoteAct(e){
+  var b = e.target.closest("button[data-q]"); if(!b) return;
+  if(!state.ui) state.ui = {};
+  if(b.dataset.q==="pin"){
+    if(state.ui.pinQuote!=null) delete state.ui.pinQuote;
+    else state.ui.pinQuote = allQuotes().indexOf(quoteOfDay());
+    renderQuotes(); scheduleSave();
+  } else {
+    askText("Your quote (add — author after a dash, e.g. …text — Seneca)", "", function(v){
+      if(!v || !v.trim()) return;
+      var parts = v.split(/\s[—–-]\s(?=[^—–-]*$)/), t = parts[0].trim(), by = (parts[1]||"").trim();
+      if(!state.quotes) state.quotes = [];
+      state.quotes.push({t:t, by:by});
+      state.ui.pinQuote = allQuotes().length-1;   // show the new one right away
+      renderQuotes(); scheduleSave();
+    });
+  }
+}
+document.getElementById("homequote").addEventListener("click", quoteAct);
+document.getElementById("hquote").addEventListener("click", quoteAct);
+
+// ---------- mindful habits: 10 presets, weekly grid, nightly journal ----------
+var HABIT_PRESETS = [
+  {id:"hourglass", e:"⏳", n:"The Hourglass", cat:"attn", type:"check", tip:"Turn the 30-min jar over and give your single most important task everything. Sand out → stand, stretch, back to it. Longer break after 3–4 jars."},
+  {id:"phone", e:"📵", n:"16:8 phone diet", cat:"attn", type:"check", tip:"No phone between 6 pm and 10 am — time-restricted scrolling. Evenings back, mornings without a screen."},
+  {id:"walk", e:"🐕", n:"Evening walk, no audio", cat:"proc", type:"num", target:15000, unit:"steps", tip:"After dinner. No podcasts, music or audiobooks — this is thinking time. Walk until 15,000 steps."},
+  {id:"journal", e:"📓", n:"Reflective journal", cat:"proc", type:"text", tip:"Last thing at night, while it's fresh: habit tracker, tiny wins, one memorable line. 5–10 minutes, doubles as wind-down."},
+  {id:"food", e:"🥗", n:"Plan tomorrow's food", cat:"decide", type:"text", tip:"Straight after journaling, write what you'll eat tomorrow. Two minutes; kills the 11 am / 4 pm decision fatigue."},
+  {id:"sleep", e:"😴", n:"4-step sleep setup", cat:"decide", type:"num", target:80, unit:"sleep score", tip:"Cats out · blinds down · earplugs in · mask on. Log your sleep score and watch it move."},
+  {id:"capture", e:"📸", n:"Screenshot everything", cat:"proc", type:"check", tip:"Memory like a sieve? Capture addresses, quotes, covers, paintings — then curate them into the journal at night."},
+  {id:"audio", e:"🎧", n:"Audiobook + boring task", cat:"attn", type:"check", tip:"Pair chores with an audiobook. The chore becomes the treat, the ideas feed back into the work."},
+  {id:"noalc", e:"🚫", n:"No alcohol", cat:"decide", type:"check", tip:"Abstaining is easier than moderating. The quiet foundation under exercise and nutrition."},
+  {id:"less", e:"🌫️", n:"Consume less, wander more", cat:"attn", type:"check", tip:"Carve out time to do nothing and let the mind wander. The brain needs rest to process what you feed it."}
+];
+var HCATS = {attn:["🛡️","Protects attention"], proc:["🌀","Creates processing time"], decide:["🧭","Removes decisions in advance"]};
+function habitsList(){
+  if(!state.habits) state.habits = HABIT_PRESETS.map(function(h){ return JSON.parse(JSON.stringify(h)); });
+  return state.habits;
+}
+function habitLog(dIso){ if(!state.hlog) state.hlog = {}; return state.hlog[dIso] || (state.hlog[dIso] = {}); }
+function habitDone(hb, v){
+  if(v==null || v==="" || v===0) return false;
+  return true;
+}
+function habitHit(hb, v){ return hb.type==="num" && hb.target ? (+v>=hb.target) : true; }
+function habitMark(id, dIso, v){
+  var log = habitLog(dIso);
+  if(v==null || v==="" || v===0) delete log[id]; else log[id] = v;
+  if(Object.keys(log).length===0) delete state.hlog[dIso];
+  scheduleSave();
+  if(curTab==="habits") renderHabits();
+  if(curTab==="home") renderHome();
+}
+function habitStreak(hb){
+  var n = 0, d = today0();
+  // today counts if done; otherwise start from yesterday so an unfinished today doesn't break the chain
+  if(!habitDone(hb, habitLog(iso(d))[hb.id])) d = addDays(d,-1);
+  while(d >= START && habitDone(hb, habitLog(iso(d))[hb.id])){ n++; d = addDays(d,-1); }
+  return n;
+}
+function habitPct(hb){
+  var days = Math.min(30, dayIndex(clampDate(today0()))+1), done = 0;
+  for(var i=0;i<days;i++){ if(habitDone(hb, habitLog(iso(addDays(today0(),-i)))[hb.id])) done++; }
+  return days ? Math.round(done/days*100) : 0;
+}
+var hbWeek = null;   // Monday of the week being viewed
+function weekStart(d){ var x = new Date(d); x.setHours(0,0,0,0); var dow = (x.getDay()+6)%7; return addDays(x, -dow); }
+function renderHabits(){
+  if(!hbWeek) hbWeek = weekStart(today0());
+  var hbs = habitsList(), tIso = iso(new Date()), end = addDays(START, DAYS-1);
+  var days = []; for(var i=0;i<7;i++) days.push(addDays(hbWeek,i));
+  var last = days[6];
+  document.getElementById("hblabel").textContent = String(hbWeek.getDate()).padStart(2,"0")+" "+MONTHS[hbWeek.getMonth()].slice(0,3)+" – "+String(last.getDate()).padStart(2,"0")+" "+MONTHS[last.getMonth()].slice(0,3)+" "+last.getFullYear();
+  var h = "<thead><tr><th class='hname'>Habit</th>";
+  days.forEach(function(d){ var dI = iso(d); h += "<th class='dayh"+(dI===tIso?" today":"")+"'>"+WD[d.getDay()]+"<b>"+d.getDate()+"</b></th>"; });
+  h += "<th>Streak</th><th>30-day</th></tr></thead><tbody>";
+  ["attn","proc","decide"].forEach(function(cat){
+    var rows = hbs.filter(function(hb){ return hb.cat===cat; });
+    if(!rows.length) return;
+    h += "<tr class='catrow'><td colspan='"+(10)+"'>"+CAT_ART[cat]+HCATS[cat][0]+" "+HCATS[cat][1]+"</td></tr>";
+    rows.forEach(function(hb){
+      var idx = hbs.indexOf(hb);
+      h += "<tr><td class='hn'><span class='e'>"+hb.e+"</span><span class='nm' data-i='"+idx+"' tabindex='0' role='button' title='Rename'>"+esc(hb.n)+"</span>"+
+        "<button class='hx' data-i='"+idx+"' title='Remove habit'>✕</button>"+
+        "<span class='tip'>"+esc(hb.tip||"")+(hb.type==="num"&&hb.target?" Target: "+hb.target.toLocaleString()+" "+esc(hb.unit||""):"")+"</span></td>";
+      days.forEach(function(d){
+        var dI = iso(d), v = habitLog(dI)[hb.id], out = d<START || d>end;
+        var ed = editableDay(dI), dn = habitDone(hb, v);
+        var cls = "hc"+(dn?(habitHit(hb,v)?" done":" partial"):"")+(ed?"":" locked");
+        var txt = "·";
+        if(dn){ txt = hb.type==="num" ? (habitHit(hb,v)?"✓":"◐") : "✓"; }
+        var sub = (hb.type==="num" && v!=null && v!=="") ? "<small>"+(+v).toLocaleString()+"</small>" : (hb.type==="text" && dn ? "<small>✎</small>" : "");
+        h += out ? "<td></td>" : "<td class='"+cls+"' data-id=\""+esc(hb.id)+"\" data-d='"+dI+"' tabindex='0' role='button' title=\""+esc(hb.n)+" · "+dI+(ed?"":" · locked")+"\">"+txt+sub+"</td>";
+      });
+      var st = habitStreak(hb);
+      h += "<td class='hstat'>"+(st>=3?"<span class='flame'>🔥</span> ":"")+"<b>"+st+"</b> d</td><td class='hstat'><b>"+habitPct(hb)+"%</b></td></tr>";
+    });
+  });
+  h += "</tbody>";
+  document.getElementById("habitgrid").innerHTML = h;
+  renderJournal();
+}
+function renderJournal(){
+  var tIso = iso(new Date()), log = habitLog(tIso), ed = editableDay(tIso);
+  var wins = dayMap("wins")[tIso]||"";
+  var hbs = habitsList(), done = hbs.filter(function(hb){ return habitDone(hb, log[hb.id]); }).length;
+  document.getElementById("journalcard").innerHTML =
+    "<h4>📓 Tonight's journal<span class='n'>"+done+" / "+hbs.length+" habits today</span><span class='hmuted' style='margin-left:auto'>"+dayLabel(today0())+"</span></h4>"+
+    "<div class='jgrid'>"+
+    "<div><label for='jwins'>Tiny wins (one per line)</label><textarea id='jwins' class='jf' data-k='wins' placeholder='finished the percentages set · walked in the rain anyway · said no to one thing'"+(ed?"":" disabled")+">"+esc(wins)+"</textarea></div>"+
+    "<div><label for='jmemo'>Most memorable or amusing thing today</label><textarea id='jmemo' class='jf' data-k='journal' placeholder='a sentence or two, while it is fresh'"+(ed?"":" disabled")+">"+esc(log.journal||"")+"</textarea></div>"+
+    "<div><label for='jfood'>Tomorrow's food plan 🥗</label><textarea id='jfood' class='jf' data-k='food' placeholder='breakfast · 11 am snack · lunch · 4 pm snack · dinner'"+(ed?"":" disabled")+">"+esc(log.food||"")+"</textarea></div>"+
+    "<div><label for='jsleep'>Sleep score last night 😴</label><input id='jsleep' class='jf' data-k='sleep' type='number' min='0' max='100' placeholder='e.g. 82' value=\""+esc(log.sleep!=null?log.sleep:"")+"\""+(ed?"":" disabled")+">"+
+    "<label for='jsteps' style='margin-top:10px'>Steps today 🐕</label><input id='jsteps' class='jf' data-k='walk' type='number' min='0' placeholder='target 15,000' value=\""+esc(log.walk!=null?log.walk:"")+"\""+(ed?"":" disabled")+"></div>"+
+    "</div>";
+}
+document.getElementById("journalcard").addEventListener("change", function(e){
+  var f = e.target.closest(".jf"); if(!f) return;
+  var tIso = iso(new Date());
+  if(!editableDay(tIso)){ lockedMsg(tIso); return; }
+  var v = f.value.trim();
+  if(f.dataset.k==="wins"){
+    if(v) dayMap("wins")[tIso] = v; else delete dayMap("wins")[tIso];
+    // tiny wins count as journaling
+    if(v && !habitLog(tIso).journal) habitMark("journal", tIso, "✓"); else scheduleSave();
+    renderHabits(); return;
+  }
+  if(f.type==="number"){ habitMark(f.dataset.k, tIso, v===""?"":+v); return; }
+  habitMark(f.dataset.k, tIso, v);
+});
+document.getElementById("habitgrid").addEventListener("click", habitAct);
+document.getElementById("habitgrid").addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ if(e.target.closest("td.hc,.nm")){ e.preventDefault(); habitAct(e); } } });
+function habitAct(e){
+  var hbs = habitsList();
+  var c = e.target.closest("td.hc");
+  if(c){
+    var dI = c.dataset.d, id = c.dataset.id;
+    if(!editableDay(dI)){ lockedMsg(dI); return; }
+    var hb = hbs.filter(function(x){ return x.id===id; })[0]; if(!hb) return;
+    var cur = habitLog(dI)[id];
+    if(hb.type==="check"){ habitMark(id, dI, cur?0:1); if(!cur) floaty(hb.e, e.clientX||innerWidth/2, e.clientY||innerHeight/2); return; }
+    if(hb.type==="num"){
+      var presets = hb.id==="walk" ? [{label:"10k",value:"10000"},{label:"12.5k",value:"12500"},{label:"15k ✓",value:"15000"},{label:"20k",value:"20000"}]
+                                    : [{label:"60",value:"60"},{label:"70",value:"70"},{label:"80",value:"80"},{label:"90",value:"90"}];
+      presets.push({label:"Clear", value:""});
+      askText(hb.n+" — "+(hb.unit||"value")+(hb.target?" (target "+hb.target.toLocaleString()+")":""), cur!=null?String(cur):"", function(v){
+        if(v===null) return; habitMark(id, dI, v===""?"":+v);
+      }, presets, true);
+      return;
+    }
+    askText(hb.n, cur||"", function(v){ if(v===null) return; habitMark(id, dI, v.trim()); });
+    return;
+  }
+  var nm = e.target.closest(".nm");
+  if(nm){ var i = +nm.dataset.i; askText("Rename habit", hbs[i].n, function(v){ if(v && v.trim()){ hbs[i].n = v.trim(); scheduleSave(); renderHabits(); } }); return; }
+  var hx = e.target.closest(".hx");
+  if(hx){ var j = +hx.dataset.i; askConfirm('Remove "'+hbs[j].n+'" from your habits? Its history stays saved.', function(yes){ if(yes){ hbs.splice(j,1); scheduleSave(); renderHabits(); } }); }
+}
+document.getElementById("hbadd").onclick = function(){
+  askText("New habit (you can rename it later)", "", function(v){
+    if(!v || !v.trim()) return;
+    var id = "h"+Date.now().toString(36);
+    habitsList().push({id:id, e:"🌱", n:v.trim(), cat:"attn", type:"check", tip:"Your own habit. Click a square each day you do it."});
+    scheduleSave(); renderHabits();
+  });
+};
+document.getElementById("hbprev").onclick = function(){ hbWeek = addDays(hbWeek, -7); if(hbWeek < weekStart(START)) hbWeek = weekStart(START); renderHabits(); };
+document.getElementById("hbnext").onclick = function(){ var mx = weekStart(addDays(START, DAYS-1)); hbWeek = addDays(hbWeek, 7); if(hbWeek > mx) hbWeek = mx; renderHabits(); };
+document.getElementById("hbthis").onclick = function(){ hbWeek = weekStart(today0()); renderHabits(); };
+
 // ---------- sand jar: a 30-minute (or any length) single-focus timer ----------
 var JAR_PRESETS = [15,25,30,45,60];
 function jarState(){
@@ -1418,6 +1728,7 @@ function jarTick(){
   if(j.end && Date.now() >= j.end && !jarDone){
     jarDone = true; j.end = null; j.remain = 0;
     var tIso = iso(new Date()); dayMap("jars")[tIso] = (dayMap("jars")[tIso]||0)+1;
+    habitMark("hourglass", tIso, 1);      // the Hourglass habit is done for today
     confetti(); floaty("⏳ Jar full — well done", innerWidth/2, innerHeight/3); try{ beep(); }catch(e){}
     scheduleSave(); if(curTab==="home") renderHome();
   }
@@ -1506,6 +1817,13 @@ function renderHome(){
   h += "<div class='hcard'><h4>📖 Today on the spread<button class='go' data-tab='spread'>Open spread →</button></h4>"+
     "<div class='hmuted' style='margin-bottom:4px'>Plan</div><input class='spin' data-k='plan' value=\""+esc(pl)+"\" placeholder='Appointments, dates, anything time-bound…'>"+
     "<div class='hmuted' style='margin:10px 0 4px'>One line about today</div><input class='spin' data-k='log' value=\""+esc(lg)+"\" placeholder='What happened, how it felt, or just the vibe'></div>";
+  // mindful habits today (check-type habits are tickable right here)
+  var hbs = habitsList(), hlogT = habitLog(tIso), hdone = hbs.filter(function(hb){ return habitDone(hb, hlogT[hb.id]); }).length;
+  h += "<div class='hcard hideable'><h4>🌿 Mindful habits<span class='n'>"+hdone+" / "+hbs.length+"</span><button class='go' data-tab='habits'>Habits →</button></h4>"+
+    hbs.filter(function(hb){ return hb.type==="check"; }).map(function(hb){
+      var dn = habitDone(hb, hlogT[hb.id]);
+      return "<label class='hbrow"+(dn?" done":"")+"'><input type='checkbox' class='hhb' data-id=\""+esc(hb.id)+"\" "+(dn?"checked":"")+"><span>"+hb.e+" "+esc(hb.n)+"</span></label>";
+    }).join("")+"</div>";
   // focus jars today
   var jarsN = dayMap("jars")[tIso]||0;
   h += "<div class='hcard hideable'><h4>⏳ Focus jars<span class='n'>"+jarsN+" today</span><button class='go' data-tab='jar'>Start a jar →</button></h4>"+
@@ -1522,6 +1840,8 @@ document.getElementById("home").addEventListener("click", function(e){
   var go = e.target.closest(".go"); if(go){ showTab(go.dataset.tab); return; }
   var cb = e.target.closest("input.hcb");
   if(cb){ var it = state.todos[+cb.dataset.i]; it.s = it.s===1?0:1; if(it.s===1) floaty("✅", e.clientX, e.clientY); renderHome(); scheduleSave(); return; }
+  var hh = e.target.closest("input.hhb");
+  if(hh){ var hbT = iso(new Date()); var cur = habitLog(hbT)[hh.dataset.id]; habitMark(hh.dataset.id, hbT, cur?0:1); renderHome(); return; }
   var bd = e.target.closest(".dot5[data-a]");
   if(bd){ var arr = dayMap("balance")[tIso]||[0,0,0,0,0,0,0]; var a=+bd.dataset.a, v=+bd.dataset.v;
     arr[a] = arr[a]===v ? 0 : v; dayMap("balance")[tIso] = arr; renderHome(); scheduleSave(); return; }
@@ -1730,10 +2050,11 @@ refresh();
 renderHours();
 renderTodos();
 renderPlans();
+renderQuotes();
 // restore the tab you were on before the last save/reload
 try{
   var savedTab = localStorage.getItem("ct365_tab");
-  if(["daily","spread","jar","hourly","todos","plans"].indexOf(savedTab)>=0) showTab(savedTab);
+  if(["daily","spread","jar","habits","hourly","todos","plans"].indexOf(savedTab)>=0) showTab(savedTab);
 }catch(e){}
 applySimple();   // after the restore, so a saved hidden tab is redirected to Home when Simple mode is on
 })();

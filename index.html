@@ -179,7 +179,7 @@ tr.nowhour td.hourlbl{color:var(--accent);font-weight:700;box-shadow:inset 3px 0
 .hb.s1{background:var(--done-bg);color:var(--done);border-color:transparent}
 .hb.s2{background:var(--half-bg);color:var(--half);border-color:transparent}
 .hb.s3{background:var(--miss-bg);color:var(--miss);border-color:transparent}
-.hb:disabled{opacity:.35;cursor:not-allowed}
+.hb:disabled,.hb.locked{opacity:.35;cursor:not-allowed}
 .hkey{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:4px 0 6px}
 .hkey span{display:inline-flex;align-items:center;gap:4px}
 .hkey i{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)}
@@ -694,7 +694,7 @@ function renderGrid(){
   h+="</tbody>";
   document.getElementById("grid").innerHTML=h;
 }
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 
 // ---------- year heatmap ----------
 function dayPct(dIso){
@@ -881,6 +881,7 @@ function moveMonth(n){
 // ---------- tabs ----------
 var curTab = "home";
 function showTab(t){
+  if(state.ui && state.ui.simple && t!=="home" && t!=="spread" && t!=="jar") t = "home";
   curTab = t;
   try{ localStorage.setItem("ct365_tab", t); }catch(e){}
   ["home","daily","spread","jar","hourly","todos","plans"].forEach(function(k){
@@ -1260,12 +1261,13 @@ function renderSpread(){
       var strip = "";
       if(kind==="log" && showHabitStrip()){
         strip = "<span class='hstrip'>"+state.tasks.map(function(t,ti){ var v=getMark(dIso,ti);
-          return "<button class='hb s"+v+"' data-d='"+dIso+"' data-t='"+ti+"' title='"+esc(t)+"'"+(editableDay(dIso)?"":" disabled")+">"+(SYM[v]||"·")+"</button>"; }).join("")+"</span>";
+          var ed = editableDay(dIso);
+          return "<button class='hb s"+v+(ed?"":" locked")+"' data-d='"+dIso+"' data-t='"+ti+"' title='"+esc(t)+(ed?"":" — locked, only today and yesterday are editable")+"'"+(ed?"":" tabindex='-1' aria-disabled='true'")+">"+(SYM[v]||"·")+"</button>"; }).join("")+"</span>";
       }
       h += "<div class='line"+(d.getDay()===1?" week":"")+(isToday?" today":"")+(future?" future":"")+"'>"+
         "<span class='d'>"+d.getDate()+"</span><span class='wd'>"+WD[d.getDay()]+"</span>"+
         "<input data-k='"+kind+"' data-d='"+dIso+"' value=\""+esc(val)+"\""+(locked?" disabled title='Locked — strict mode'":"")+
-        " placeholder='"+hint+"' aria-label='"+dIso+" "+kind+"'>"+strip+"</div>";
+        " placeholder='"+esc(hint)+"' aria-label='"+dIso+" "+kind+"'>"+strip+"</div>";
     }
     return h;
   }
@@ -1728,11 +1730,11 @@ refresh();
 renderHours();
 renderTodos();
 renderPlans();
-applySimple();
 // restore the tab you were on before the last save/reload
 try{
   var savedTab = localStorage.getItem("ct365_tab");
   if(["daily","spread","jar","hourly","todos","plans"].indexOf(savedTab)>=0) showTab(savedTab);
 }catch(e){}
+applySimple();   // after the restore, so a saved hidden tab is redirected to Home when Simple mode is on
 })();
 </script>

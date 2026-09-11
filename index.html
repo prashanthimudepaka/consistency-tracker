@@ -1,4 +1,6 @@
 <title>365 Consistency</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#2E7D5B">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -142,8 +144,34 @@ tr.nowhour td.hourlbl{color:var(--accent);font-weight:700;box-shadow:inset 3px 0
 .addrow select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;cursor:pointer}
 .addrow select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .noteshead{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:17px;margin:6px 0 8px}
-#notes{width:100%;min-height:180px;resize:vertical;font:inherit;font-size:14px;line-height:1.6;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.notebar{display:flex;flex-wrap:wrap;gap:4px;background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;padding:6px 8px}
+.notebar button{border:0;background:none;border-radius:5px;padding:4px 10px;font-size:13px;font-weight:600;color:var(--muted)}
+.notebar button:hover{background:var(--accent-soft);color:var(--accent)}
+.notebar .sep{width:1px;background:var(--line);margin:2px 4px}
+#notes{width:100%;min-height:180px;font:inherit;font-size:14px;line-height:1.6;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:0 0 10px 10px;padding:12px 16px;overflow-y:auto}
 #notes:focus{outline:2px solid var(--accent);outline-offset:-1px}
+#notes:empty::before{content:attr(data-placeholder);color:var(--muted)}
+#notes h3{font-family:"Fraunces",Georgia,serif;font-size:17px;margin:10px 0 4px}
+#notes ul,#notes ol{margin:4px 0;padding-left:26px}
+#notes li{margin:2px 0}
+#notes input.ncb{width:15px;height:15px;accent-color:var(--accent);vertical-align:-2px;margin-right:6px;cursor:pointer}
+#notes .ckd{text-decoration:line-through;color:var(--muted)}
+/* --- plans board --- */
+.swatches{display:flex;gap:5px;align-items:center}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
+.sw.sel{border-color:var(--ink);transform:scale(1.12)}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;padding:8px 2px 30px}
+.plan{border-radius:4px 18px 4px 4px;padding:16px 14px 38px;min-height:130px;color:#3A3325;box-shadow:0 4px 10px rgba(0,0,0,.14);position:relative;font-size:14px;line-height:1.5;transition:transform .15s ease, box-shadow .15s ease;word-break:break-word}
+.plan:nth-child(3n){transform:rotate(1.2deg)}
+.plan:nth-child(3n+1){transform:rotate(-1.4deg)}
+.plan:nth-child(3n+2){transform:rotate(.6deg)}
+.plan:hover{transform:rotate(0) scale(1.04);box-shadow:0 10px 24px rgba(0,0,0,.2);z-index:2}
+.plan .ptxt{cursor:text;white-space:pre-wrap}
+.plan .pdate{position:absolute;bottom:10px;left:14px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;opacity:.55}
+.plan .prm{position:absolute;bottom:6px;right:8px;border:0;background:none;color:inherit;opacity:.4;font-size:13px;padding:2px 6px}
+.plan .prm:hover{opacity:1}
+.plan .pin{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:17px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.boardempty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
 /* --- strict mode --- */
 tr.locked td.cell,tr.locked td.wake,tr.locked td.mood{cursor:not-allowed}
 tr.locked td.cell:hover,tr.locked td.wake:hover,tr.locked td.mood:hover{background:inherit}
@@ -205,6 +233,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
     <button id="tabbtn-daily" class="active">Daily tracker</button>
     <button id="tabbtn-hourly">Hourly log</button>
     <button id="tabbtn-todos">To-dos &amp; Notes</button>
+    <button id="tabbtn-plans">🎨 Plans</button>
   </div>
 
   <div id="tab-daily">
@@ -270,8 +299,31 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
     <div class="subtabs" id="todoview"></div>
     <div id="todolist"></div>
     <div class="noteshead">Notes</div>
-    <textarea id="notes" placeholder="Backlogs, leftovers, what got done, anything…"></textarea>
-    <div class="foot">To-dos and notes save automatically.</div>
+    <div class="notebar">
+      <button data-cmd="h" title="Heading">H</button>
+      <button data-cmd="p" title="Normal text">¶</button>
+      <span class="sep"></span>
+      <button data-cmd="bold" title="Bold"><b>B</b></button>
+      <button data-cmd="italic" title="Italic"><i>I</i></button>
+      <span class="sep"></span>
+      <button data-cmd="ul" title="Bullet list">• List</button>
+      <button data-cmd="ol" title="Numbered list">1. List</button>
+      <button data-cmd="ck" title="Insert a checkbox item">☑ Check</button>
+    </div>
+    <div id="notes" contenteditable="true" data-placeholder="Backlogs, leftovers, what got done, anything… Use the toolbar for headings, lists and checkboxes."></div>
+    <div class="foot">To-dos and notes save automatically. Select text, then use the toolbar to format it.</div>
+  </div>
+
+  <div id="tab-plans" hidden>
+    <div class="addrow">
+      <input id="newplan" placeholder="Write a plan, a goal, a dream… and press Enter" aria-label="New plan">
+      <div class="swatches" id="swatches"></div>
+      <button id="addplan" class="primary">Pin it</button>
+    </div>
+    <div class="legend">
+      <span class="k">🎨 pick a color, pin your plan to the board · click a note to edit · drag corner feel, zero pressure</span>
+    </div>
+    <div class="board" id="plansboard"></div>
   </div>
 </div>
 
@@ -287,7 +339,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
   </div>
 </div>
 
-<script type="application/json" id="state">{"tasks":["Task 1","Task 2","Task 3"],"entries":{},"mood":{"2026-09-11":2},"hours":{},"todos":[{"t":"j","s":0,"d":"2026-09-11"},{"t":"jk","s":2,"d":"2026-09-11"}],"notes":"","rev":20,"ui":{"todoStyle":"bullet"}}</script>
+<script type="application/json" id="state">{"tasks":["Task 1","Task 2","Task 3"],"entries":{},"mood":{"2026-09-11":3},"hours":{},"todos":[{"t":"j","s":2,"d":"2026-09-11"},{"t":"k","s":1,"d":"2026-09-11","ms":753},{"t":"j","s":2,"d":"2026-09-11"},{"t":"jk","s":1,"d":"2026-09-11","ms":657}],"notes":"","rev":54,"ui":{"todoStyle":"bullet"},"wake":{"2026-09-11":4}}</script>
 <script>
 (function(){
 "use strict";
@@ -366,11 +418,13 @@ function scheduleSave(){
 function doPublish(){
   if(!canPublish){ setSave("Saved on this device only"); return; }
   document.getElementById("state").textContent = JSON.stringify(state);
-  var app = document.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap");
+  var app = document.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard");
   document.getElementById("tab-daily").hidden = false;
   document.getElementById("tab-hourly").hidden = true;
   document.getElementById("tab-todos").hidden = true;
+  document.getElementById("tab-plans").hidden = true;
   document.getElementById("dlg").hidden = true;
+  document.querySelectorAll(".floaty,#confetti").forEach(function(el){ el.remove(); });
   var saved = [];
   app.forEach(function(el){ saved.push(el.innerHTML); el.innerHTML=""; });
   var html = "<!doctype html>\n<html>"+document.documentElement.innerHTML+"</html>";
@@ -649,18 +703,18 @@ var curTab = "daily";
 function showTab(t){
   curTab = t;
   try{ localStorage.setItem("ct365_tab", t); }catch(e){}
-  document.getElementById("tab-daily").hidden = t!=="daily";
-  document.getElementById("tab-hourly").hidden = t!=="hourly";
-  document.getElementById("tab-todos").hidden = t!=="todos";
-  document.getElementById("tabbtn-daily").className = t==="daily"?"active":"";
-  document.getElementById("tabbtn-hourly").className = t==="hourly"?"active":"";
-  document.getElementById("tabbtn-todos").className = t==="todos"?"active":"";
+  ["daily","hourly","todos","plans"].forEach(function(k){
+    document.getElementById("tab-"+k).hidden = t!==k;
+    document.getElementById("tabbtn-"+k).className = t===k?"active":"";
+  });
   if(t==="hourly") renderHours();
   if(t==="todos") renderTodos();
+  if(t==="plans") renderPlans();
 }
 document.getElementById("tabbtn-daily").onclick=function(){ showTab("daily"); };
 document.getElementById("tabbtn-hourly").onclick=function(){ showTab("hourly"); };
 document.getElementById("tabbtn-todos").onclick=function(){ showTab("todos"); };
+document.getElementById("tabbtn-plans").onclick=function(){ showTab("plans"); };
 
 // ---------- hourly log ----------
 var hourDate = clampDate(new Date());
@@ -770,9 +824,9 @@ function renderTodos(){
   var todayIso = iso(new Date());
   var today=[], backlog=[], leftover=[], doneOld=[], autoLeft=[];
   list.forEach(function(it,i){
+    if(it.s===1){ doneOld.push(i); return; }   // done items (any date) live in the Done section
     if(it.s===2){ backlog.push(i); return; }
     if(it.d===todayIso){ today.push(i); return; }
-    if(it.s===1){ doneOld.push(i); return; }
     if(it.s===3){ leftover.push(i); return; }
     leftover.push(i); autoLeft.push(i);   // older, still not done -> auto left over
   });
@@ -781,7 +835,7 @@ function renderTodos(){
     (today.length?groupedRows(today):"<div class='todoempty'>Nothing for today yet — add one above.</div>")+"</div>";
   h += section("Left over", "⏳", leftover, leftover.length>0 || openSec===3, "Nothing left over — clean slate.", autoLeft);
   h += section("Backlog", "📦", backlog, openSec===2, "Backlog is empty.");
-  h += section("Done (earlier days)", "✅", doneOld, false, "Nothing finished on earlier days yet.");
+  h += section("Done", "✅", doneOld, openSec===1, "Nothing marked done yet.");
   openSec = null;
   document.getElementById("todolist").innerHTML = h;
 }
@@ -851,14 +905,14 @@ document.getElementById("todolist").addEventListener("click", function(e){
   if(cb){
     var it = state.todos[+cb.dataset.i];
     it.s = it.s===1 ? 0 : 1;
-    if(it.s===1) floaty("✅", e.clientX||innerWidth/2, e.clientY||innerHeight/2);
+    if(it.s===1){ floaty("✅", e.clientX||innerWidth/2, e.clientY||innerHeight/2); openSec = 1; }
     renderTodos(); scheduleSave(); return;
   }
   var chip = e.target.closest(".chip");
   if(chip){
     var it = state.todos[+chip.dataset.i];
     it.s = (it.s+1)%4;
-    if(it.s===2 || it.s===3) openSec = it.s;
+    if(it.s===1 || it.s===2 || it.s===3) openSec = it.s;
     renderTodos(); scheduleSave(); return;
   }
   var tb = e.target.closest(".tbtn");
@@ -909,11 +963,108 @@ document.getElementById("todolist").addEventListener("click", function(e){
     });
   }
 });
+// ---------- formal notes editor ----------
 var notesEl = document.getElementById("notes");
-notesEl.value = state.notes||"";
-notesEl.addEventListener("change", function(){
-  state.notes = notesEl.value;
+(function initNotes(){
+  var n = state.notes||"";
+  // migrate old plain-text notes to HTML once
+  if(n && n.indexOf("<")===-1){
+    n = "<p>"+esc(n).replace(/\n/g,"<br>")+"</p>";
+  }
+  notesEl.innerHTML = n;
+})();
+function saveNotes(){
+  state.notes = notesEl.innerHTML;
   scheduleSave();
+}
+notesEl.addEventListener("input", saveNotes);
+notesEl.addEventListener("click", function(e){
+  var ck = e.target.closest("input.ncb");
+  if(!ck) return;
+  // persist checkbox state as an attribute so it survives saves
+  if(ck.checked) ck.setAttribute("checked",""); else ck.removeAttribute("checked");
+  var lbl = ck.parentElement;
+  if(lbl && lbl.classList) lbl.classList.toggle("ckd", ck.checked);
+  saveNotes();
+});
+document.querySelectorAll(".notebar button").forEach(function(b){
+  b.addEventListener("mousedown", function(e){ e.preventDefault(); }); // keep editor focus
+  b.addEventListener("click", function(){
+    notesEl.focus();
+    var c = b.dataset.cmd;
+    if(c==="h") document.execCommand("formatBlock", false, "<h3>");
+    else if(c==="p") document.execCommand("formatBlock", false, "<p>");
+    else if(c==="bold") document.execCommand("bold");
+    else if(c==="italic") document.execCommand("italic");
+    else if(c==="ul") document.execCommand("insertUnorderedList");
+    else if(c==="ol") document.execCommand("insertOrderedList");
+    else if(c==="ck") document.execCommand("insertHTML", false,
+      "<div><input type='checkbox' class='ncb' contenteditable='false'>&nbsp;</div>");
+    saveNotes();
+  });
+});
+
+// ---------- plans board ----------
+var PCOLORS = ["#FFF3B0","#FFD6E0","#CDE7FF","#D6F5DD","#E6DAFF","#FFE0C2"];
+var PPINS = ["📌","🌟","💡","🌱","💜","🔥"];
+var planColor = 0;
+function renderSwatches(){
+  document.getElementById("swatches").innerHTML = PCOLORS.map(function(c,i){
+    return "<button class='sw"+(i===planColor?" sel":"")+"' data-c='"+i+"' style='background:"+c+"' title='Note color'></button>";
+  }).join("");
+}
+function renderPlans(){
+  renderSwatches();
+  var list = state.plans||[];
+  var el = document.getElementById("plansboard");
+  if(!list.length){
+    el.innerHTML = "<div class='boardempty'>🎨 Your plan board is empty.<br>Write a goal above, pick a color, and pin it.</div>";
+    return;
+  }
+  el.innerHTML = list.map(function(p,i){
+    return "<div class='plan' style='background:"+PCOLORS[p.c||0]+"'>"+
+      "<span class='pin'>"+PPINS[p.c||0]+"</span>"+
+      "<div class='ptxt' data-i='"+i+"' tabindex='0' role='button' title='Edit'>"+esc(p.t)+"</div>"+
+      "<span class='pdate'>"+esc(p.d||"")+"</span>"+
+      "<button class='prm' data-i='"+i+"' title='Remove'>✕</button></div>";
+  }).join("");
+}
+document.getElementById("swatches").addEventListener("click", function(e){
+  var b = e.target.closest(".sw");
+  if(!b) return;
+  planColor = +b.dataset.c;
+  renderSwatches();
+});
+function addPlan(){
+  var inp = document.getElementById("newplan");
+  var v = inp.value.trim();
+  if(!v) return;
+  if(!state.plans) state.plans = [];
+  state.plans.unshift({t:v, c:planColor, d:iso(new Date())});
+  inp.value = "";
+  renderPlans(); scheduleSave();
+  confetti();
+}
+document.getElementById("addplan").onclick = addPlan;
+document.getElementById("newplan").addEventListener("keydown", function(e){
+  if(e.key==="Enter") addPlan();
+});
+document.getElementById("plansboard").addEventListener("click", function(e){
+  var rm = e.target.closest(".prm");
+  if(rm){
+    var i = +rm.dataset.i;
+    askConfirm("Take this plan off the board?", function(yes){
+      if(yes){ state.plans.splice(i,1); renderPlans(); scheduleSave(); }
+    });
+    return;
+  }
+  var tx = e.target.closest(".ptxt");
+  if(tx){
+    var p = state.plans[+tx.dataset.i];
+    askText("Edit plan", p.t, function(n){
+      if(n && n.trim()){ p.t = n.trim(); renderPlans(); scheduleSave(); }
+    });
+  }
 });
 
 // ---------- backup & restore ----------
@@ -940,8 +1091,10 @@ document.getElementById("importfile").addEventListener("change", function(){
       askConfirm("Replace all current data with this backup?", function(yes){
         if(!yes) return;
         state = data;
-        refresh(); renderHours(); renderTodos();
-        var n = document.getElementById("notes"); n.value = state.notes||"";
+        refresh(); renderHours(); renderTodos(); renderPlans();
+        var n = state.notes||"";
+        if(n && n.indexOf("<")===-1) n = "<p>"+esc(n).replace(/\n/g,"<br>")+"</p>";
+        document.getElementById("notes").innerHTML = n;
         scheduleSave();
         setSave("Backup restored ✓");
       });
@@ -953,10 +1106,11 @@ document.getElementById("importfile").addEventListener("change", function(){
 refresh();
 renderHours();
 renderTodos();
-// restore the tab you were on before the last reload
+renderPlans();
+// restore the tab you were on before the last save/reload
 try{
   var savedTab = localStorage.getItem("ct365_tab");
-  if(savedTab==="hourly" || savedTab==="todos") showTab(savedTab);
+  if(savedTab==="hourly" || savedTab==="todos" || savedTab==="plans") showTab(savedTab);
 }catch(e){}
 })();
 </script>

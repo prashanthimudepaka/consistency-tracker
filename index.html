@@ -91,6 +91,9 @@ td.mood.empty{font-size:12px;color:var(--muted)}
 .tabs button{border:0;background:none;border-radius:0;padding:8px 14px;color:var(--muted);font-weight:600;border-bottom:2px solid transparent}
 .tabs button.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tabs button:hover{color:var(--ink)}
+.tabs{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{white-space:nowrap;flex:0 0 auto}
 td.hourlbl{text-align:right;padding:6px 12px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;width:80px}
 td.hourtxt{padding:0}
 td.hourtxt input{width:100%;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;padding:8px 12px;outline:none}
@@ -381,7 +384,73 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
 .store button{font-size:12px;padding:4px 10px;white-space:nowrap}
 #syncbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 #syncbtn.bad{border-color:var(--miss);color:var(--miss)}
-@media (max-width:600px){body{padding:14px 8px 48px} h1{font-size:22px}}
+@media (max-width:600px){
+  body{padding:14px 8px 48px}
+  h1{font-size:22px}
+  .sub{font-size:12px}
+  header{gap:8px;margin-bottom:12px}
+  header button{padding:5px 10px;font-size:13px}
+  .legend,.foot,.hmuted{font-size:12px}
+  /* text fields at 16px so iOS doesn't zoom the page when you tap one */
+  input,textarea,select{font-size:16px}
+
+  /* tabs: swipeable, and always within reach while you scroll */
+  .tabs{position:sticky;top:0;z-index:50;background:var(--bg);margin:0 -8px 14px;padding:0 8px;
+        box-shadow:0 6px 10px -10px rgba(0,0,0,.55)}
+  .tabs button{padding:10px 12px;font-size:13.5px}
+
+  /* toolbars: the date/month gets its own line, buttons share the next */
+  .toolbar{gap:6px}
+  .toolbar .month,.daylabel{min-width:0;flex:1 1 100%;order:-1;font-size:17px;text-align:left}
+  .toolbar button{flex:1 1 auto}
+
+  /* add rows stack instead of overflowing */
+  .addrow{flex-wrap:wrap}
+  .addrow input{flex:1 1 100%}
+  .addrow select,.addrow button{flex:1 1 auto}
+  .swatches{flex:1 1 100%;justify-content:space-between}
+
+  /* to-do rows: the text gets its own line, controls sit underneath */
+  .todoitem{flex-wrap:wrap;gap:8px;padding:10px 12px}
+  .todoitem .txt{flex:1 1 100%;order:-1;font-size:15px}
+  .todoitem .chip{min-width:0;padding:5px 10px}
+  .todoitem .tmr,.todoitem .cd{min-width:0}
+  .todoitem .rm{margin-left:auto}
+
+  /* finger-sized targets */
+  .dot5{width:24px;height:24px}
+  .hb{width:26px;height:26px;font-size:12px}
+  .cb,.htask input,.hbrow input,#notes input.ncb{width:20px;height:20px}
+  .tbtn,.kbtn{width:36px;height:36px;font-size:14px}
+  .sw{width:32px;height:32px}
+
+  /* hourly log now fits the screen — no sideways scrolling at all */
+  #hourgrid{min-width:0}
+  td.hourlbl{width:60px;padding:6px 4px;font-size:11px}
+
+  /* the genuinely wide grids keep their first column pinned while you scroll them */
+  #grid,#habitgrid{min-width:560px}
+  #grid th:first-child,#grid td.datecell,
+  #habitgrid th.hname,#habitgrid td.hn{position:sticky;left:0;background:var(--panel);z-index:2}
+  #grid th:first-child,#habitgrid th.hname{z-index:3}
+  #habitgrid th.hname,#habitgrid td.hn{min-width:132px;max-width:132px;padding:8px 8px}
+  #habitgrid td.hn .tip{display:none}
+  #habitgrid td.hstat{font-size:11px;padding:0 6px}
+  #habitgrid td.hn .hx{opacity:1}
+  tr.today td.datecell{background:var(--accent-soft)}
+
+  /* quote: buttons below the words instead of on top of them */
+  .quote{padding:16px 16px 12px 18px}
+  .quote .qbtns{position:static;justify-content:flex-end;margin-top:8px}
+  .quote blockquote{font-size:16.5px}
+
+  /* odds and ends */
+  .jartime{font-size:44px}
+  .hero{padding:14px}
+  .homedate{font-size:22px}
+  .store{flex-wrap:wrap}
+  .store button{width:100%}
+}
 </style>
 <div class="wrap">
   <header>

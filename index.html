@@ -364,7 +364,23 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
 .dlg .btns{display:flex;justify-content:flex-end;gap:8px}
 .dlg label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:6px 0 3px}
 .dlg p{font-size:13px;color:var(--muted);margin:0 0 10px;line-height:1.5}
-.dlg code{background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px;user-select:all}
+.dlg code{background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px;user-select:all;word-break:break-all}
+.dlg.wide{width:min(94vw,460px)}
+.dlg ol{margin:0 0 10px;padding-left:20px;font-size:13px;color:var(--muted);line-height:1.6}
+.dlg ol b{color:var(--ink)}
+.syncmsg{font-size:13px;line-height:1.5;border-radius:8px;padding:9px 11px;margin-bottom:10px}
+.syncmsg.ok{background:var(--done-bg);color:var(--done)}
+.syncmsg.bad{background:var(--miss-bg);color:var(--miss)}
+.syncmsg.busy{background:var(--half-bg);color:var(--half)}
+.storelist{margin-bottom:10px;max-height:210px;overflow-y:auto}
+.store{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px}
+.store.cur{border-color:var(--accent);background:var(--accent-soft)}
+.store .sd{flex:1;line-height:1.4}
+.store .sd b{display:block;font-size:13px}
+.store .sd span{color:var(--muted);font-size:11.5px}
+.store button{font-size:12px;padding:4px 10px;white-space:nowrap}
+#syncbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+#syncbtn.bad{border-color:var(--miss);color:var(--miss)}
 @media (max-width:600px){body{padding:14px 8px 48px} h1{font-size:22px}}
 </style>
 <div class="wrap">
@@ -592,15 +608,22 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
 </div>
 
 <div id="syncdlg" class="dlgwrap" hidden>
-  <div class="dlg" role="dialog" aria-modal="true">
+  <div class="dlg wide" role="dialog" aria-modal="true">
     <h3>☁ Sync across devices</h3>
-    <p>Your data is stored in a <b>private Gist in your own GitHub account</b> — nothing goes anywhere else. One-time setup: create a token at <b>github.com → Settings → Developer settings → Personal access tokens</b> (classic token with the <b>gist</b> scope, or a fine-grained token with <b>Gists: read &amp; write</b>). Paste it below on each device.</p>
-    <label for="synctoken">GitHub token</label>
-    <input id="synctoken" type="password" autocomplete="off" placeholder="ghp_… or github_pat_…">
-    <label for="syncgist">Sync code (leave blank on your first device)</label>
-    <input id="syncgist" autocomplete="off" placeholder="paste the sync code from your other device">
-    <div id="syncinfo" style="font-size:13px;margin-bottom:10px"></div>
-    <div class="btns"><button id="syncoff">Disconnect</button><button id="synccancel">Cancel</button><button id="syncok" class="primary">Connect</button></div>
+    <p>Your data is stored in a <b>private Gist in your own GitHub account</b> — nothing is sent anywhere else.</p>
+    <ol>
+      <li>On github.com open <b>Settings → Developer settings → Personal access tokens → Tokens (classic)</b> and choose <b>Generate new token (classic)</b>.</li>
+      <li>Tick the <b>gist</b> checkbox — that one scope is all this needs. <b>Fine-grained tokens do not work</b>: GitHub's Gists API only accepts classic tokens.</li>
+      <li>Copy the token (it starts <code>ghp_</code>) and paste it below — on this device and on your phone.</li>
+    </ol>
+    <div id="syncinfo"></div>
+    <label for="synctoken">GitHub classic token (gist scope)</label>
+    <input id="synctoken" type="password" autocomplete="off" spellcheck="false" placeholder="ghp_…">
+    <div class="btns" style="justify-content:flex-start;margin-bottom:10px"><button id="syncfind">🔍 Find my sync stores</button><button id="syncnew">＋ Create new store</button></div>
+    <div class="storelist" id="synclist"></div>
+    <label for="syncgist">Sync code — blank means "use this device's store"</label>
+    <input id="syncgist" autocomplete="off" spellcheck="false" placeholder="paste a sync code, or use Find above">
+    <div class="btns"><button id="syncoff">Disconnect</button><button id="synccancel">Close</button><button id="syncok" class="primary">Connect</button></div>
   </div>
 </div>
 
@@ -628,6 +651,7 @@ var state;
 try{ state = JSON.parse(document.getElementById("state").textContent); }
 catch(e){ state = {tasks:["Task 1","Task 2","Task 3"], entries:{}, mood:{}, hours:{}, todos:[], rev:0}; }
 try{ var ls = localStorage.getItem("ct365"); if(ls){ var l=JSON.parse(ls); if((l.rev||0) > (state.rev||0)) state = l; } }catch(e){}
+if(state.hlog) Object.keys(state.hlog).forEach(function(k){ if(!Object.keys(state.hlog[k]).length) delete state.hlog[k]; });
 
 var artifactNS = null, canPublish = false;
 if(window.claude && claude.use){
@@ -1166,6 +1190,8 @@ setInterval(function(){
     if(todoIso()===lastTodayIso) todoDate = today0();
     if(iso(hourDate)===lastTodayIso) hourDate = today0();
     lastTodayIso = nowIso;
+    if(hbWeek && +hbWeek===+weekStart(addDays(today0(),-1))) hbWeek = weekStart(today0());
+    if(curTab==="habits" && !document.querySelector("#journalcard :focus")) renderHabits();
     renderQuotes(); refresh(); if(curTab==="todos") renderTodos(); if(curTab==="hourly") renderHours();
   }
   var list = state.todos||[];
@@ -1461,7 +1487,7 @@ function quoteOfDay(){
   return qs[idx];
 }
 function renderQuotes(){
-  var q = quoteOfDay(), pinned = state.ui && state.ui.pinQuote!=null;
+  var q = quoteOfDay(), pinned = state.ui && state.ui.pinQuote!=null && state.ui.pinQuote>=0;
   var html = "<span class='qmark'>“</span><blockquote>"+esc(q[0])+"</blockquote>"+(q[1]?"<cite>— "+esc(q[1])+"</cite>":"")+
     "<div class='qbtns'><button data-q='pin' title='"+(pinned?"Unpin — go back to a new quote each day":"Pin this quote so it stays")+"'>"+(pinned?"📌 pinned":"📌")+"</button><button data-q='add' title='Add a quote of your own'>+ quote</button></div>";
   ["homequote","hquote"].forEach(function(id){ var el = document.getElementById(id); if(el) el.innerHTML = html; });
@@ -1471,12 +1497,12 @@ function quoteAct(e){
   if(!state.ui) state.ui = {};
   if(b.dataset.q==="pin"){
     if(state.ui.pinQuote!=null) delete state.ui.pinQuote;
-    else state.ui.pinQuote = allQuotes().indexOf(quoteOfDay());
+    else { var qs = allQuotes(); state.ui.pinQuote = dayIndex(clampDate(today0())) % qs.length; }
     renderQuotes(); scheduleSave();
   } else {
     askText("Your quote (add — author after a dash, e.g. …text — Seneca)", "", function(v){
       if(!v || !v.trim()) return;
-      var parts = v.split(/\s[—–-]\s(?=[^—–-]*$)/), t = parts[0].trim(), by = (parts[1]||"").trim();
+      var parts = v.split(/\s[—–-]\s(?!.*\s[—–-]\s)/), t = parts[0].trim(), by = (parts[1]||"").trim();
       if(!state.quotes) state.quotes = [];
       state.quotes.push({t:t, by:by});
       state.ui.pinQuote = allQuotes().length-1;   // show the new one right away
@@ -1505,14 +1531,17 @@ function habitsList(){
   if(!state.habits) state.habits = HABIT_PRESETS.map(function(h){ return JSON.parse(JSON.stringify(h)); });
   return state.habits;
 }
-function habitLog(dIso){ if(!state.hlog) state.hlog = {}; return state.hlog[dIso] || (state.hlog[dIso] = {}); }
+function habitLog(dIso){ return (state.hlog||{})[dIso]||{}; }
+var JOURNAL_AUTO = "✓";   // sentinel: journaling counted via tiny wins, not typed text
+function memoText(v){ return v===JOURNAL_AUTO ? "" : (v||""); }
 function habitDone(hb, v){
   if(v==null || v==="" || v===0) return false;
   return true;
 }
 function habitHit(hb, v){ return hb.type==="num" && hb.target ? (+v>=hb.target) : true; }
 function habitMark(id, dIso, v){
-  var log = habitLog(dIso);
+  if(!state.hlog) state.hlog = {};
+  var log = state.hlog[dIso] || (state.hlog[dIso] = {});
   if(v==null || v==="" || v===0) delete log[id]; else log[id] = v;
   if(Object.keys(log).length===0) delete state.hlog[dIso];
   scheduleSave();
@@ -1571,12 +1600,13 @@ function renderHabits(){
 function renderJournal(){
   var tIso = iso(new Date()), log = habitLog(tIso), ed = editableDay(tIso);
   var wins = dayMap("wins")[tIso]||"";
+  document.getElementById("journalcard").dataset.d = tIso;
   var hbs = habitsList(), done = hbs.filter(function(hb){ return habitDone(hb, log[hb.id]); }).length;
   document.getElementById("journalcard").innerHTML =
     "<h4>📓 Tonight's journal<span class='n'>"+done+" / "+hbs.length+" habits today</span><span class='hmuted' style='margin-left:auto'>"+dayLabel(today0())+"</span></h4>"+
     "<div class='jgrid'>"+
     "<div><label for='jwins'>Tiny wins (one per line)</label><textarea id='jwins' class='jf' data-k='wins' placeholder='finished the percentages set · walked in the rain anyway · said no to one thing'"+(ed?"":" disabled")+">"+esc(wins)+"</textarea></div>"+
-    "<div><label for='jmemo'>Most memorable or amusing thing today</label><textarea id='jmemo' class='jf' data-k='journal' placeholder='a sentence or two, while it is fresh'"+(ed?"":" disabled")+">"+esc(log.journal||"")+"</textarea></div>"+
+    "<div><label for='jmemo'>Most memorable or amusing thing today</label><textarea id='jmemo' class='jf' data-k='journal' placeholder='a sentence or two, while it is fresh'"+(ed?"":" disabled")+">"+esc(memoText(log.journal))+"</textarea></div>"+
     "<div><label for='jfood'>Tomorrow's food plan 🥗</label><textarea id='jfood' class='jf' data-k='food' placeholder='breakfast · 11 am snack · lunch · 4 pm snack · dinner'"+(ed?"":" disabled")+">"+esc(log.food||"")+"</textarea></div>"+
     "<div><label for='jsleep'>Sleep score last night 😴</label><input id='jsleep' class='jf' data-k='sleep' type='number' min='0' max='100' placeholder='e.g. 82' value=\""+esc(log.sleep!=null?log.sleep:"")+"\""+(ed?"":" disabled")+">"+
     "<label for='jsteps' style='margin-top:10px'>Steps today 🐕</label><input id='jsteps' class='jf' data-k='walk' type='number' min='0' placeholder='target 15,000' value=\""+esc(log.walk!=null?log.walk:"")+"\""+(ed?"":" disabled")+"></div>"+
@@ -1584,16 +1614,19 @@ function renderJournal(){
 }
 document.getElementById("journalcard").addEventListener("change", function(e){
   var f = e.target.closest(".jf"); if(!f) return;
-  var tIso = iso(new Date());
+  var tIso = document.getElementById("journalcard").dataset.d || iso(new Date());
   if(!editableDay(tIso)){ lockedMsg(tIso); return; }
   var v = f.value.trim();
   if(f.dataset.k==="wins"){
     if(v) dayMap("wins")[tIso] = v; else delete dayMap("wins")[tIso];
-    // tiny wins count as journaling
-    if(v && !habitLog(tIso).journal) habitMark("journal", tIso, "✓"); else scheduleSave();
+    var j = habitLog(tIso).journal;
+    if(v && !j) habitMark("journal", tIso, JOURNAL_AUTO);            // tiny wins count as journaling
+    else if(!v && j===JOURNAL_AUTO) habitMark("journal", tIso, "");  // wins cleared -> drop the auto-mark
+    else scheduleSave();
     renderHabits(); return;
   }
   if(f.type==="number"){ habitMark(f.dataset.k, tIso, v===""?"":+v); return; }
+  if(f.dataset.k==="journal" && !v && dayMap("wins")[tIso]) v = JOURNAL_AUTO;   // empty memo but wins exist -> keep the mark
   habitMark(f.dataset.k, tIso, v);
 });
 document.getElementById("habitgrid").addEventListener("click", habitAct);
@@ -1616,7 +1649,7 @@ function habitAct(e){
       }, presets, true);
       return;
     }
-    askText(hb.n, cur||"", function(v){ if(v===null) return; habitMark(id, dI, v.trim()); });
+    askText(hb.n, memoText(cur), function(v){ if(v===null) return; var tv = v.trim(); if(id==="journal" && !tv && dayMap("wins")[dI]) tv = JOURNAL_AUTO; habitMark(id, dI, tv); });
     return;
   }
   var nm = e.target.closest(".nm");
@@ -1931,7 +1964,14 @@ document.getElementById("plansboard").addEventListener("click", function(e){
 });
 
 // ---------- backup & restore ----------
-function rerenderAll(){ refresh(); renderHours(); renderTodos(); renderPlans(); }
+function rerenderAll(){
+  refresh(); renderHours(); renderTodos(); renderPlans();
+  if(typeof renderQuotes==="function") renderQuotes();
+  if(typeof renderHabits==="function" && curTab==="habits") renderHabits();
+  if(typeof renderSpread==="function" && curTab==="spread") renderSpread();
+  var n = document.getElementById("notes");
+  if(n && typeof renderNotes==="function") renderNotes();
+}
 document.getElementById("exportbtn").onclick = function(){
   var blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
   var a = document.createElement("a");
@@ -1960,14 +2000,48 @@ document.getElementById("importfile").addEventListener("change", function(){
 });
 
 // ---------- cross-device sync via a private GitHub Gist ----------
-var GH_TOKEN = "", GIST_ID = "", syncTimer = null, syncEtag = null;
+var GH_TOKEN = "", GIST_ID = "", syncTimer = null, syncEtag = null, syncFails = 0, syncBusy = false;
 try{ GH_TOKEN = localStorage.getItem("ct365_gh_token")||""; GIST_ID = localStorage.getItem("ct365_gist")||""; }catch(e){}
 var GIST_FILE = "consistency-tracker.json";
-function syncBtn(t){ document.getElementById("syncbtn").textContent = t; }
+function syncBtn(txt, cls){
+  var b = document.getElementById("syncbtn");
+  b.textContent = txt; b.className = cls||"";
+}
+function syncMsg(text, kind){
+  var el = document.getElementById("syncinfo");
+  if(!el) return;
+  el.innerHTML = text ? "<div class='syncmsg "+(kind||"busy")+"'>"+text+"</div>" : "";
+}
+// a gist id is the long hex string in the id or in a gist URL
+function gistIdFrom(v){
+  var m = String(v||"").trim().match(/[0-9a-f]{20,}/i);
+  return m ? m[0] : "";
+}
+function ghExplain(status){
+  if(status===401) return "<b>Token rejected (401).</b> It's mistyped, expired or revoked. Generate a new <b>classic</b> token and paste it again.";
+  if(status===403) return "<b>Not allowed (403).</b> The token is missing the <b>gist</b> scope — or it's a fine-grained token, which GitHub's Gists API does not accept. Use a <b>classic</b> token with <b>gist</b> ticked.";
+  if(status===404) return "<b>Not found (404).</b> Either the sync code is wrong, or this token belongs to a different GitHub account than the one that created the sync store.";
+  if(status===422) return "<b>GitHub rejected the data (422).</b> Try Disconnect, then Connect again with a blank sync code.";
+  return "<b>GitHub returned HTTP "+status+".</b>";
+}
 function ghFetch(url, opts){
   opts = opts||{};
-  opts.headers = Object.assign({"Authorization":"Bearer "+GH_TOKEN, "Accept":"application/vnd.github+json"}, opts.headers||{});
-  return fetch(url, opts);
+  opts.headers = Object.assign({
+    "Authorization":"Bearer "+GH_TOKEN,
+    "Accept":"application/vnd.github+json",
+    "Content-Type":"application/json"
+  }, opts.headers||{});
+  return fetch(url, opts).then(function(r){
+    if(!r.ok){ var e = new Error("HTTP "+r.status); e.status = r.status; throw e; }
+    return r;
+  }, function(){
+    var e = new Error("network"); e.network = true; throw e;
+  });
+}
+function failText(e){
+  return e && e.network
+    ? "<b>Couldn't reach GitHub.</b> Check your internet connection (and any VPN, firewall or content blocker)."
+    : ghExplain(e && e.status);
 }
 function adoptRemote(remote){
   state = remote;
@@ -1976,12 +2050,16 @@ function adoptRemote(remote){
 }
 function syncPull(cb){
   if(!GH_TOKEN || !GIST_ID){ if(cb) cb(); return; }
-  ghFetch("https://api.github.com/gists/"+GIST_ID, {headers: syncEtag?{"If-None-Match":syncEtag}:{}}).then(function(r){
+  fetch("https://api.github.com/gists/"+GIST_ID, {headers: Object.assign(
+      {"Authorization":"Bearer "+GH_TOKEN, "Accept":"application/vnd.github+json"},
+      syncEtag?{"If-None-Match":syncEtag}:{})})
+  .then(function(r){
     if(r.status===304) return null;
-    if(!r.ok) throw new Error("HTTP "+r.status);
+    if(!r.ok){ var e = new Error("HTTP "+r.status); e.status = r.status; throw e; }
     syncEtag = r.headers.get("ETag");
     return r.json();
   }).then(function(g){
+    syncFails = 0;
     if(g){
       var f = g.files && g.files[GIST_FILE];
       if(f && f.content){
@@ -1989,62 +2067,180 @@ function syncPull(cb){
         if((remote.updated||0) > (state.updated||0)){ adoptRemote(remote); setSave("Synced ☁ — pulled newer data"); }
       }
     }
-    syncBtn("☁ Synced"); if(cb) cb();
-  }).catch(function(e){ syncBtn("☁ Sync error"); setSave("Sync failed: "+e.message, true); if(cb) cb(e); });
+    syncBtn("☁ Synced", "on"); if(cb) cb();
+  }).catch(function(e){
+    syncFails++;
+    syncBtn("☁ Sync error", "bad");
+    setSave("Sync problem — open ☁ Sync for details", true);
+    syncMsg(failText(e), "bad");
+    if(cb) cb(e);
+  });
 }
 function syncPush(){
   if(!GH_TOKEN || !GIST_ID) return;
+  if(syncFails >= 3) return;                       // stop hammering a broken setup
   clearTimeout(syncTimer);
   syncTimer = setTimeout(function(){
     var files = {}; files[GIST_FILE] = {content: JSON.stringify(state)};
     ghFetch("https://api.github.com/gists/"+GIST_ID, {method:"PATCH", body: JSON.stringify({files:files})})
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); syncEtag = r.headers.get("ETag"); setSave("Synced ☁"); syncBtn("☁ Synced"); })
-      .catch(function(e){ syncBtn("☁ Sync error"); setSave("Sync failed: "+e.message+" — kept on this device", true); });
+      .then(function(r){ syncFails = 0; syncEtag = r.headers.get("ETag"); setSave("Synced ☁"); syncBtn("☁ Synced","on"); })
+      .catch(function(e){
+        syncFails++;
+        syncBtn("☁ Sync error","bad");
+        setSave("Sync problem — open ☁ Sync for details", true);
+        syncMsg(failText(e), "bad");
+      });
   }, 1500);
 }
+function syncCodeHtml(){
+  return "✅ <b>Connected.</b> Everything you track here now syncs.<br>Your sync code:<br><code id='synccode'>"+esc(GIST_ID)+"</code><br>"+
+         "On your other device: open this site, tap <b>☁ Sync</b>, paste the <b>same token</b>, then press <b>🔍 Find my sync stores</b> and choose this one — no need to type the code.";
+}
+// ---- store picker: list every sync store in the account so you never need the code ----
+function storeSummary(d){
+  var days = {};
+  ["entries","hlog","notesByDay","hours","mood","wake","quick","reminder","plan","log","balance","energy","priorities","wins","jars"]
+    .forEach(function(k){ Object.keys(d[k]||{}).forEach(function(x){ days[x]=1; }); });
+  return {days:Object.keys(days).length, todos:(d.todos||[]).length, plans:(d.plans||[]).length, rev:d.rev||0};
+}
+function renderStores(list){
+  var el = document.getElementById("synclist");
+  if(!list.length){ el.innerHTML = "<div class='hmuted' style='font-size:13px;padding:4px 2px'>No sync stores in this account yet — press <b>＋ Create new store</b>.</div>"; return; }
+  el.innerHTML = list.map(function(g){
+    var s = g.sum, when = new Date(g.updated_at);
+    var det = s ? (s.days+" day"+(s.days===1?"":"s")+" logged · "+s.todos+" to-do"+(s.todos===1?"":"s")+" · "+s.plans+" plan"+(s.plans===1?"":"s")) : "couldn't read this one";
+    return "<div class='store"+(g.id===GIST_ID?" cur":"")+"'><div class='sd'><b>"+det+"</b>"+
+      "<span>last change "+when.toLocaleString()+(g.id===GIST_ID?" · this device":"")+"</span></div>"+
+      (g.id===GIST_ID ? "<button disabled>in use</button>" : "<button data-use='"+esc(g.id)+"'>Use this</button>")+"</div>";
+  }).join("");
+}
+function findStores(){
+  var tok = document.getElementById("synctoken").value.trim();
+  if(!tok){ syncMsg("Paste your GitHub classic token first, then press Find.", "bad"); return; }
+  GH_TOKEN = tok; try{ localStorage.setItem("ct365_gh_token", tok); }catch(e){}
+  syncMsg("Looking for your sync stores…", "busy");
+  return ghFetch("https://api.github.com/gists?per_page=100").then(function(r){ return r.json(); }).then(function(gs){
+    var mine = (gs||[]).filter(function(g){ return g.files && g.files[GIST_FILE]; }).slice(0, 10);
+    return Promise.all(mine.map(function(g){
+      return ghFetch("https://api.github.com/gists/"+g.id).then(function(r){ return r.json(); })
+        .then(function(full){
+          var f = full.files && full.files[GIST_FILE];
+          try{ g.sum = storeSummary(JSON.parse(f.content||"{}")); }catch(e){ g.sum = null; }
+          return g;
+        }).catch(function(){ g.sum = null; return g; });
+    })).then(function(full){
+      full.sort(function(a,b){ return (b.sum?b.sum.rev:0) - (a.sum?a.sum.rev:0); });
+      renderStores(full);
+      syncMsg(full.length ? "Found <b>"+full.length+"</b> sync store"+(full.length===1?"":"s")+" in this account. Pick the one with your data — the richest is listed first." : "", full.length?"ok":"busy");
+      return full;
+    });
+  }).catch(function(e){ syncMsg(failText(e), "bad"); return []; });
+}
+document.getElementById("syncfind").onclick = function(){ findStores(); };
+document.getElementById("synclist").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-use]"); if(!b) return;
+  document.getElementById("syncgist").value = b.dataset.use;
+  document.getElementById("syncok").click();
+});
+function createStore(){
+  syncMsg("Creating a new private sync store…", "busy");
+  var files = {}; files[GIST_FILE] = {content: JSON.stringify(state)};
+  return ghFetch("https://api.github.com/gists", {method:"POST", body: JSON.stringify({
+    description:"365 Consistency tracker data", public:false, files:files
+  })}).then(function(r){ return r.json(); }).then(function(g){
+    GIST_ID = g.id; syncEtag = null; syncFails = 0;
+    try{ localStorage.setItem("ct365_gist", g.id); }catch(e){}
+    syncBtn("☁ Synced","on"); setSave("Synced ☁");
+    syncMsg(syncCodeHtml(), "ok");
+    findStores();
+  }).catch(function(e){ syncBtn("☁ Sync error","bad"); syncMsg(failText(e), "bad"); });
+}
+document.getElementById("syncnew").onclick = function(){
+  var tok = document.getElementById("synctoken").value.trim();
+  if(!tok){ syncMsg("Paste your GitHub classic token first.", "bad"); return; }
+  GH_TOKEN = tok; try{ localStorage.setItem("ct365_gh_token", tok); }catch(e){}
+  askConfirm("Create a brand-new, empty sync store? Use this only if you don't already have one — otherwise press Find and pick your existing store.", function(yes){
+    if(yes) createStore();
+  });
+};
 document.getElementById("syncbtn").onclick = function(){
   document.getElementById("synctoken").value = GH_TOKEN;
   document.getElementById("syncgist").value = GIST_ID;
-  document.getElementById("syncinfo").innerHTML = GIST_ID
-    ? "✅ Connected. Your sync code: <code>"+esc(GIST_ID)+"</code> — enter this (with your token) on your other device."
-    : "";
+  syncMsg(GIST_ID ? syncCodeHtml() : "", GIST_ID ? "ok" : "");
   document.getElementById("syncdlg").hidden = false;
+  setTimeout(function(){ document.getElementById(GH_TOKEN?"syncgist":"synctoken").focus(); }, 30);
 };
 document.getElementById("synccancel").onclick = function(){ document.getElementById("syncdlg").hidden = true; };
 document.getElementById("syncoff").onclick = function(){
-  GH_TOKEN = ""; GIST_ID = ""; syncEtag = null;
+  GH_TOKEN = ""; GIST_ID = ""; syncEtag = null; syncFails = 0;
   try{ localStorage.removeItem("ct365_gh_token"); localStorage.removeItem("ct365_gist"); }catch(e){}
-  syncBtn("☁ Sync"); setSave("Sync disconnected — saved on this device only");
-  document.getElementById("syncdlg").hidden = true;
+  document.getElementById("synctoken").value = "";
+  document.getElementById("syncgist").value = "";
+  syncBtn("☁ Sync","");
+  syncMsg("Disconnected. This device now saves locally only — your data is still here.", "busy");
+  setSave("Sync disconnected — saved on this device only");
 };
 document.getElementById("syncok").onclick = function(){
+  if(syncBusy) return;
   var tok = document.getElementById("synctoken").value.trim();
-  var gid = document.getElementById("syncgist").value.trim();
-  var info = document.getElementById("syncinfo");
-  if(!tok){ info.textContent = "Please paste a GitHub token first."; return; }
+  var gid = gistIdFrom(document.getElementById("syncgist").value);
+  var raw = document.getElementById("syncgist").value.trim();
+  if(!tok){ syncMsg("Paste your GitHub classic token first.", "bad"); return; }
+  if(raw && !gid){ syncMsg("That sync code doesn't look right — paste the code exactly as the other device showed it (a long string of letters and numbers), or leave it blank to start fresh here.", "bad"); return; }
+  syncBusy = true; syncFails = 0;
   GH_TOKEN = tok; try{ localStorage.setItem("ct365_gh_token", tok); }catch(e){}
-  info.textContent = "Connecting…";
-  if(gid){
-    GIST_ID = gid; syncEtag = null; try{ localStorage.setItem("ct365_gist", gid); }catch(e){}
-    syncPull(function(err){
-      if(err){ info.textContent = "Couldn't reach that sync code — check the token and code."; return; }
-      syncPush(); info.innerHTML = "✅ Connected. Sync code: <code>"+esc(GIST_ID)+"</code>";
-      setTimeout(function(){ document.getElementById("syncdlg").hidden = true; }, 900);
+  syncMsg("Checking the token…", "busy");
+  // step 1: does the token work at all, and whose is it?
+  ghFetch("https://api.github.com/user").then(function(r){ return r.json(); }).then(function(u){
+    var who = u && u.login ? esc(u.login) : "your account";
+    if(gid){
+      // step 2a: join the existing sync store
+      syncMsg("Token OK (<b>"+who+"</b>). Opening the sync store…", "busy");
+      GIST_ID = gid; syncEtag = null;
+      try{ localStorage.setItem("ct365_gist", gid); }catch(e){}
+      return ghFetch("https://api.github.com/gists/"+gid).then(function(r){ return r.json(); }).then(function(g){
+        var f = g.files && g.files[GIST_FILE];
+        if(!f){ throw Object.assign(new Error("wrong gist"), {wrongGist:true}); }
+        var remote = JSON.parse(f.content||"{}");
+        askConfirm("Use the data from your other device on this one? (Anything only on this device is replaced.)", function(yes){
+          if(yes){ adoptRemote(remote); setSave("Synced ☁ — pulled data from your other device"); }
+          else { scheduleSave(); }
+          syncBtn("☁ Synced","on");
+          syncMsg(syncCodeHtml(), "ok");
+          syncBusy = false;
+        });
+      });
+    }
+    // step 2b: this device is already connected — reuse its store, never make a duplicate
+    if(GIST_ID){
+      syncBusy = false; syncFails = 0;
+      syncBtn("☁ Synced","on");
+      syncMsg(syncCodeHtml(), "ok");
+      scheduleSave();                       // push what's here into the existing store
+      findStores();
+      return;
+    }
+    // step 2c: no code and no store yet — show what already exists rather than adding another
+    syncMsg("Token OK (<b>"+who+"</b>). Checking what you already have…", "busy");
+    return findStores().then(function(list){
+      syncBusy = false;
+      if(list.length){
+        syncMsg("You already have <b>"+list.length+"</b> sync store"+(list.length===1?"":"s")+" in this account. Press <b>Use this</b> on the one holding your data (richest is first). Only press <b>＋ Create new store</b> if you truly want to start over.", "ok");
+      } else {
+        return createStore();
+      }
     });
-  } else {
-    var files = {}; files[GIST_FILE] = {content: JSON.stringify(state)};
-    ghFetch("https://api.github.com/gists", {method:"POST", body: JSON.stringify({description:"365 Consistency tracker data", public:false, files:files})})
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-      .then(function(g){
-        GIST_ID = g.id; try{ localStorage.setItem("ct365_gist", g.id); }catch(e){}
-        syncBtn("☁ Synced"); setSave("Synced ☁");
-        info.innerHTML = "✅ Connected! Your sync code: <code>"+esc(g.id)+"</code><br>On your other device: tap ☁ Sync, paste the same token and this code.";
-      })
-      .catch(function(e){ info.textContent = "Couldn't create the sync store ("+e.message+"). Check the token has the gist scope."; });
-  }
+  }).catch(function(e){
+    syncBusy = false;
+    syncBtn("☁ Sync error","bad");
+    syncMsg(e && e.wrongGist
+      ? "<b>That sync code points at a different gist.</b> It has no tracker data in it. Check the code on your other device, or leave the field blank here to start a new sync store."
+      : failText(e), "bad");
+  });
 };
-if(GH_TOKEN && GIST_ID){ syncBtn("☁ Syncing…"); syncPull(); }
-setInterval(function(){ syncPull(); }, 45000);
+if(GH_TOKEN && GIST_ID){ syncBtn("☁ Syncing…",""); syncPull(); }
+setInterval(function(){ if(syncFails < 3) syncPull(); }, 45000);
+document.addEventListener("visibilitychange", function(){ if(!document.hidden && syncFails < 3) syncPull(); });
 
 refresh();
 renderHours();

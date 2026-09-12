@@ -256,6 +256,7 @@ td.hstat b{color:var(--ink)}
 .quote .qbtns button{border:0;background:none;color:var(--muted);font-size:12px;padding:3px 7px;border-radius:5px}
 .quote .qbtns button:hover{background:var(--accent-soft);color:var(--accent)}
 tr.catrow td .cart{vertical-align:middle;margin-right:8px}
+tr.catrow td .cs{display:inline-flex;align-items:center;position:sticky;left:12px}
 .homequote{display:flex;flex-direction:column;align-items:center;gap:6px}
 .homequote svg{width:120px;height:auto;opacity:.9}
 /* --- home --- */
@@ -433,7 +434,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
   #grid th:first-child,#grid td.datecell,
   #habitgrid th.hname,#habitgrid td.hn{position:sticky;left:0;background:var(--panel);z-index:2}
   #grid th:first-child,#habitgrid th.hname{z-index:3}
-  #habitgrid th.hname,#habitgrid td.hn{min-width:132px;max-width:132px;padding:8px 8px}
+  #habitgrid th.hname,#habitgrid td.hn{min-width:150px;max-width:150px;padding:8px 8px;font-size:13px;line-height:1.3}
   #habitgrid td.hn .tip{display:none}
   #habitgrid td.hstat{font-size:11px;padding:0 6px}
   #habitgrid td.hn .hx{opacity:1}
@@ -1643,7 +1644,7 @@ function renderHabits(){
   ["attn","proc","decide"].forEach(function(cat){
     var rows = hbs.filter(function(hb){ return hb.cat===cat; });
     if(!rows.length) return;
-    h += "<tr class='catrow'><td colspan='"+(10)+"'>"+CAT_ART[cat]+HCATS[cat][0]+" "+HCATS[cat][1]+"</td></tr>";
+    h += "<tr class='catrow'><td colspan='"+(10)+"'><span class='cs'>"+CAT_ART[cat]+HCATS[cat][0]+" "+HCATS[cat][1]+"</span></td></tr>";
     rows.forEach(function(hb){
       var idx = hbs.indexOf(hb);
       h += "<tr><td class='hn'><span class='e'>"+hb.e+"</span><span class='nm' data-i='"+idx+"' tabindex='0' role='button' title='Rename'>"+esc(hb.n)+"</span>"+

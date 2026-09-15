@@ -1270,16 +1270,17 @@ function renderTodos(){
 }
 
 function attachNoteListeners(){
+  var iso = todoIso();
   // Load existing notes into editors
   document.querySelectorAll(".qnote-editor").forEach(function(editor){
     var ni = +editor.dataset.ni;
-    if(state.todoNotes && state.todoNotes[selIso] && state.todoNotes[selIso][ni]){
-      editor.innerHTML = state.todoNotes[selIso][ni];
+    if(state.todoNotes && state.todoNotes[iso] && state.todoNotes[iso][ni]){
+      editor.innerHTML = state.todoNotes[iso][ni];
     }
     editor.addEventListener("input", function(){
       if(!state.todoNotes) state.todoNotes = {};
-      if(!state.todoNotes[selIso]) state.todoNotes[selIso] = [];
-      state.todoNotes[selIso][ni] = editor.innerHTML.trim();
+      if(!state.todoNotes[iso]) state.todoNotes[iso] = [];
+      state.todoNotes[iso][ni] = editor.innerHTML.trim();
       scheduleSave();
     });
   });
@@ -1289,8 +1290,8 @@ function attachNoteListeners(){
   if(addBtn){
     addBtn.onclick = function(){
       if(!state.todoNotes) state.todoNotes = {};
-      if(!state.todoNotes[selIso]) state.todoNotes[selIso] = [];
-      state.todoNotes[selIso].unshift("");  // Add blank note at top
+      if(!state.todoNotes[iso]) state.todoNotes[iso] = [];
+      state.todoNotes[iso].unshift("");  // Add blank note at top
       renderTodos();
       scheduleSave();
     };
@@ -1316,9 +1317,9 @@ function attachNoteListeners(){
   document.querySelectorAll(".qnote button[data-del]").forEach(function(btn){
     btn.onclick = function(){
       var ni = +btn.dataset.del;
-      if(state.todoNotes && state.todoNotes[selIso]){
-        state.todoNotes[selIso].splice(ni, 1);
-        if(!state.todoNotes[selIso].length) delete state.todoNotes[selIso];
+      if(state.todoNotes && state.todoNotes[iso]){
+        state.todoNotes[iso].splice(ni, 1);
+        if(!state.todoNotes[iso].length) delete state.todoNotes[iso];
         renderTodos();
         scheduleSave();
       }

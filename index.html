@@ -1236,34 +1236,30 @@ function renderTodos(){
   h += section("Left over", "⏳", leftover, leftover.length>0 || openSec===3, "Nothing left over — clean slate.", autoLeft);
   h += section("Backlog", "📦", backlog, openSec===2, "Backlog is empty.");
   h += section("Done", "✅", done, openSec===1, "Nothing marked done on this day yet.");
-  // Quick notes section - list of rich text notes
+  // Quick notes section - like Notes, but multiple notes per day
   if(!state.todoNotes) state.todoNotes = {};
   var dayNotes = state.todoNotes[selIso] || [];
-  var quickNotesHtml = "<div class='secpanel' style='border-top:1px solid var(--line); padding-top:14px; margin-top:14px;'>";
-  quickNotesHtml += "<div style='display:flex; align-items:center; margin-bottom:10px;'>";
-  quickNotesHtml += "<h3 style='margin:0; font-size:14px; flex:1;'>📝 Quick Notes</h3>";
+  var quickNotesHtml = "";
+  quickNotesHtml += "<div style='margin-top:20px;'>";
+  quickNotesHtml += "<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;'>";
+  quickNotesHtml += "<h3 style='margin:0; font-size:16px; font-weight:bold;'>Quick Notes · "+dayLabel(todoDate)+"</h3>";
+  quickNotesHtml += "<button id='quickNoteAddBtn' style='padding:4px 10px; background:var(--accent); color:white; border:none; border-radius:4px; cursor:pointer; font-size:12px;'>+ Add</button>";
   quickNotesHtml += "</div>";
-  if(dayNotes.length) {
-    dayNotes.forEach(function(note, ni){
-      quickNotesHtml += "<div class='qnote' data-ni='"+ni+"' style='background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px; margin-bottom:8px;'>";
-      quickNotesHtml += "<div style='display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;'>";
-      quickNotesHtml += "<div style='display:flex; gap:4px; flex:1;'>";
-      quickNotesHtml += "<button data-cmd='h3' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-weight:bold; color:var(--muted); font-size:11px;'>H</button>";
-      quickNotesHtml += "<button data-cmd='bold' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-weight:bold; color:var(--muted); font-size:11px;'>B</button>";
-      quickNotesHtml += "<button data-cmd='italic' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-style:italic; color:var(--muted); font-size:11px;'>/</button>";
-      quickNotesHtml += "<button data-cmd='insertUnorderedList' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--muted); font-size:11px;'>•</button>";
-      quickNotesHtml += "<button data-cmd='insertOrderedList' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--muted); font-size:11px;'>1.</button>";
-      quickNotesHtml += "</div>";
-      quickNotesHtml += "<button data-del='"+ni+"' style='background:none; border:none; color:var(--muted); cursor:pointer; padding:0; font-size:16px;'>✕</button>";
-      quickNotesHtml += "</div>";
-      quickNotesHtml += "<div class='qnote-editor' data-ni='"+ni+"' contenteditable='true' style='background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:6px; font-size:13px; min-height:40px; outline:none; word-break:break-word;'></div>";
-      quickNotesHtml += "</div>";
-    });
-  }
-  quickNotesHtml += "<div style='display:flex; gap:6px; margin-top:10px;'>";
-  quickNotesHtml += "<input type='text' id='newNoteInput' placeholder='Add a new quick note...' style='flex:1; font-size:13px; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink);'>";
-  quickNotesHtml += "<button id='addNoteBtn' style='padding:6px 12px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px;'>Add</button>";
-  quickNotesHtml += "</div>";
+  dayNotes.forEach(function(note, ni){
+    quickNotesHtml += "<div class='qnote' data-ni='"+ni+"' style='margin-bottom:12px;'>";
+    quickNotesHtml += "<div style='display:flex; gap:6px; margin-bottom:6px; align-items:center;'>";
+    quickNotesHtml += "<button data-cmd='h3' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-weight:bold; color:var(--muted);'>H</button>";
+    quickNotesHtml += "<button data-cmd='bold' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-weight:bold; color:var(--muted);'>B</button>";
+    quickNotesHtml += "<button data-cmd='italic' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-style:italic; color:var(--muted);'>/</button>";
+    quickNotesHtml += "<button data-cmd='insertUnorderedList' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--muted);'>• List</button>";
+    quickNotesHtml += "<button data-cmd='insertOrderedList' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--muted);'>1. List</button>";
+    quickNotesHtml += "<button data-cmd='insertUnorderedList' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--muted);'>☑ Check</button>";
+    quickNotesHtml += "<span style='flex:1;'></span>";
+    quickNotesHtml += "<button data-del='"+ni+"' style='background:none; border:none; color:var(--muted); cursor:pointer; padding:0; font-size:14px;'>✕</button>";
+    quickNotesHtml += "</div>";
+    quickNotesHtml += "<div class='qnote-editor' data-ni='"+ni+"' contenteditable='true' style='background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px; font-size:13px; min-height:60px; outline:none; word-break:break-word;'></div>";
+    quickNotesHtml += "</div>";
+  });
   quickNotesHtml += "</div>";
   h += quickNotesHtml;
 
@@ -1288,31 +1284,24 @@ function attachNoteListeners(){
     });
   });
   
-  // Add button
-  var addBtn = document.getElementById("addNoteBtn");
+  // Add button - creates blank note at top
+  var addBtn = document.getElementById("quickNoteAddBtn");
   if(addBtn){
     addBtn.onclick = function(){
-      var inp = document.getElementById("newNoteInput");
-      var txt = inp.value.trim();
-      if(!txt) return;
       if(!state.todoNotes) state.todoNotes = {};
       if(!state.todoNotes[selIso]) state.todoNotes[selIso] = [];
-      state.todoNotes[selIso].push(txt);
-      inp.value = "";
+      state.todoNotes[selIso].unshift("");  // Add blank note at top
       renderTodos();
       scheduleSave();
     };
-    document.getElementById("newNoteInput").addEventListener("keypress", function(e){
-      if(e.key==="Enter"){ addBtn.click(); }
-    });
   }
   
   // Format buttons
-  document.querySelectorAll("#todolist button[data-cmd]").forEach(function(btn){
+  document.querySelectorAll(".qnote button[data-cmd]").forEach(function(btn){
     btn.onclick = function(e){
       e.preventDefault();
       var cmd = btn.dataset.cmd;
-      var ni = btn.dataset.ni;
+      var ni = +btn.dataset.ni;
       var editor = document.querySelector(".qnote-editor[data-ni='"+ni+"']");
       if(editor) editor.focus();
       if(cmd === "h3"){ document.execCommand("formatBlock", false, "<h3>"); }
@@ -1324,7 +1313,7 @@ function attachNoteListeners(){
   });
   
   // Delete buttons
-  document.querySelectorAll("button[data-del]").forEach(function(btn){
+  document.querySelectorAll(".qnote button[data-del]").forEach(function(btn){
     btn.onclick = function(){
       var ni = +btn.dataset.del;
       if(state.todoNotes && state.todoNotes[selIso]){

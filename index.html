@@ -673,6 +673,11 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
     <div class="legend">
       <span class="k">🎨 pick a color, pin your plan to the board · click a note to edit · drag corner feel, zero pressure</span>
     </div>
+    <div style="display:flex; gap:8px; margin:12px 0; border-bottom:1px solid var(--line); padding-bottom:8px;">
+      <button id="plan-monthly" class="plan-subtab active" style="background:none; border:none; padding:8px 12px; color:var(--accent); cursor:pointer; font-weight:bold;">📅 Monthly</button>
+      <button id="plan-weekly" class="plan-subtab" style="background:none; border:none; padding:8px 12px; color:var(--muted); cursor:pointer; font-weight:bold;">📆 Weekly</button>
+      <button id="plan-daily" class="plan-subtab" style="background:none; border:none; padding:8px 12px; color:var(--muted); cursor:pointer; font-weight:bold;">📋 Daily</button>
+    </div>
     <div class="board" id="plansboard"></div>
   </div>
 </div>
@@ -2062,6 +2067,7 @@ document.getElementById("home").addEventListener("change", function(e){
 var PCOLORS = ["#FFF3B0","#FFD6E0","#CDE7FF","#D6F5DD","#E6DAFF","#FFE0C2"];
 var PPINS = ["📌","🌟","💡","🌱","💜","🔥"];
 var planColor = 0;
+var planPeriod = "monthly";  // monthly, weekly, or daily
 function renderSwatches(){
   document.getElementById("swatches").innerHTML = PCOLORS.map(function(c,i){
     return "<button class='sw"+(i===planColor?" sel":"")+"' data-c='"+i+"' style='background:"+c+"' title='Note color'></button>";
@@ -2069,7 +2075,21 @@ function renderSwatches(){
 }
 function renderPlans(){
   renderSwatches();
-  var list = state.plans||[];
+  // Update sub-tab styling
+  ["monthly","weekly","daily"].forEach(function(p){
+    var btn = document.getElementById("plan-"+p);
+    if(btn){
+      if(p === planPeriod){
+        btn.style.color = "var(--accent)";
+      } else {
+        btn.style.color = "var(--muted)";
+      }
+    }
+  });
+  
+  // Get the correct array for current period
+  var arrayName = "plans" + planPeriod.charAt(0).toUpperCase() + planPeriod.slice(1);
+  var list = state[arrayName] || [];
   var el = document.getElementById("plansboard");
   if(!list.length){
     el.innerHTML = "<div class='boardempty'>🎨 Your plan board is empty.<br>Write a goal above, pick a color, and pin it.</div>";
@@ -2093,8 +2113,9 @@ function addPlan(){
   var inp = document.getElementById("newplan");
   var v = inp.value.trim();
   if(!v) return;
-  if(!state.plans) state.plans = [];
-  state.plans.unshift({t:v, c:planColor, d:iso(new Date())});
+  var arrayName = "plans" + planPeriod.charAt(0).toUpperCase() + planPeriod.slice(1);
+  if(!state[arrayName]) state[arrayName] = [];
+  state[arrayName].unshift({t:v, c:planColor, d:iso(new Date())});
   inp.value = "";
   renderPlans(); scheduleSave();
   confetti();
@@ -2104,20 +2125,31 @@ document.getElementById("newplan").addEventListener("keydown", function(e){
   if(e.key==="Enter") addPlan();
 });
 document.getElementById("plansboard").addEventListener("click", function(e){
+  var arrayName = "plans" + planPeriod.charAt(0).toUpperCase() + planPeriod.slice(1);
   var rm = e.target.closest(".prm");
   if(rm){
     var i = +rm.dataset.i;
     askConfirm("Take this plan off the board?", function(yes){
-      if(yes){ state.plans.splice(i,1); renderPlans(); scheduleSave(); }
+      if(yes){ state[arrayName].splice(i,1); renderPlans(); scheduleSave(); }
     });
     return;
   }
   var tx = e.target.closest(".ptxt");
   if(tx){
-    var p = state.plans[+tx.dataset.i];
+    var p = state[arrayName][+tx.dataset.i];
     askText("Edit plan", p.t, function(n){
       if(n && n.trim()){ p.t = n.trim(); renderPlans(); scheduleSave(); }
     });
+  }
+});
+// Plan period tab switchers
+["monthly","weekly","daily"].forEach(function(period){
+  var btn = document.getElementById("plan-"+period);
+  if(btn){
+    btn.onclick = function(){
+      planPeriod = period;
+      renderPlans();
+    };
   }
 });
 

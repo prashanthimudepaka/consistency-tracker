@@ -1,0 +1,9 @@
+{
+  "name": "consistency-tracker",
+  "private": true,
+  "type": "module",
+  "description": "365-day consistency tracker — static page plus a Neon-backed state API",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0"
+  }
+}

@@ -14,6 +14,17 @@ A single-file, no-dependency HTML tracker for building daily consistency over a 
 - **Hourly log** — 24 rows per day to note what you actually did each hour.
 - **To-dos & Notes** — today's checklist up top; collapsible date-grouped sections for Left over, Backlog, and Done; checkbox or bullet display; per-task stopwatch ▶ and countdown timer ⏱ (with confetti when time's up); free-form notes.
 
+## Hosting options
+
+| Where | Storage | Best for |
+|---|---|---|
+| Open `index.html` locally | that browser only | trying it out |
+| GitHub Pages | that browser, plus optional GitHub Gist sync | simple, no account setup |
+| **Vercel + Neon** — see **[DEPLOY.md](DEPLOY.md)** | **one database, shared by every device** | **daily use across phone and laptop** |
+
+With Vercel + Neon there is no syncing at all: every device reads and writes the same
+database row, so whatever you change is immediately what everything else shows.
+
 ## Usage
 
 Open `index.html` in any browser. Progress is saved in the browser's localStorage. Use **☁ Sync** (private GitHub Gist, your own account) to share data between devices, or **⬇ Backup / ⬆ Restore** for manual transfer.

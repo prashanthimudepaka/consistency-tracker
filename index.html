@@ -786,7 +786,8 @@ function scheduleSave(){
   state.rev = (state.rev||0)+1;
   state.updated = Date.now();
   try{ localStorage.setItem("ct365", JSON.stringify(state)); }catch(e){}
-  if(typeof syncPush==="function") syncPush();
+  if(typeof CLOUD!=="undefined" && CLOUD.on){ cloudPush(); }
+  else if(typeof syncPush==="function"){ syncPush(); }
   setSave("Saving…");
   clearTimeout(saveTimer);
   saveTimer = setTimeout(doPublish, 1200);
@@ -2119,6 +2120,7 @@ function adoptRemote(remote){
   rerenderAll();
 }
 function syncPull(cb){
+  if(typeof CLOUD!=="undefined" && CLOUD.on){ if(cb) cb(); return; }   // database mode: gist sync stands down
   if(!GH_TOKEN || !GIST_ID){ if(cb) cb(); return; }
   fetch("https://api.github.com/gists/"+GIST_ID, {headers: Object.assign(
       {"Authorization":"Bearer "+GH_TOKEN, "Accept":"application/vnd.github+json"},
@@ -2147,6 +2149,7 @@ function syncPull(cb){
   });
 }
 function syncPush(){
+  if(typeof CLOUD!=="undefined" && CLOUD.on) return;                    // database mode: gist sync stands down
   if(!GH_TOKEN || !GIST_ID) return;
   if(syncFails >= 3) return;                       // stop hammering a broken setup
   clearTimeout(syncTimer);
@@ -2311,6 +2314,109 @@ document.getElementById("syncok").onclick = function(){
 if(GH_TOKEN && GIST_ID){ syncBtn("☁ Syncing…",""); syncPull(); }
 setInterval(function(){ if(syncFails < 3) syncPull(); }, 45000);
 document.addEventListener("visibilitychange", function(){ if(!document.hidden && syncFails < 3) syncPull(); });
+
+// ---------- cloud storage: one database behind /api/state (Vercel + Neon) ----------
+// When this page is served somewhere that has the API, the database is the single
+// source of truth — every device reads and writes the same row, so there is nothing
+// to sync and nothing to reconcile. On plain static hosting the call 404s and the
+// page quietly carries on saving locally.
+var CLOUD = {on:false, version:0, pass:"", pushTimer:null, pulling:false};
+try{ CLOUD.pass = localStorage.getItem("ct365_pass")||""; }catch(e){}
+function cloudHead(){
+  var h = {"Content-Type":"application/json"};
+  if(CLOUD.pass) h["x-passcode"] = CLOUD.pass;
+  return h;
+}
+function cloudAdopt(remote, version){
+  CLOUD.version = version;
+  state = remote;
+  try{ localStorage.setItem("ct365", JSON.stringify(state)); }catch(e){}
+  rerenderAll();
+}
+function askPasscode(msg){
+  syncBtn("☁ Locked","bad");
+  askText(msg || "Passcode for your tracker", "", function(v){
+    if(v===null || !v.trim()) return;
+    CLOUD.pass = v.trim();
+    try{ localStorage.setItem("ct365_pass", CLOUD.pass); }catch(e){}
+    cloudPull();
+  });
+}
+function cloudPull(silent){
+  if(!CLOUD.on || CLOUD.pulling) return Promise.resolve();
+  CLOUD.pulling = true;
+  return fetch("/api/state", {headers: cloudHead()}).then(function(r){
+    CLOUD.pulling = false;
+    if(r.status===401){ askPasscode("That passcode was wrong — try again"); return; }
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.json().then(function(d){
+      if(d.version===0){ CLOUD.version = 0; cloudPush(true); return; }   // empty database: seed it from here
+      if(d.version > CLOUD.version && d.state){
+        cloudAdopt(d.state, d.version);
+        if(!silent) setSave("Updated from your database ☁");
+      } else CLOUD.version = d.version;
+      syncBtn("☁ Cloud","on");
+    });
+  }).catch(function(){
+    CLOUD.pulling = false;
+    syncBtn("☁ Offline","bad");
+  });
+}
+function cloudPush(immediate){
+  if(!CLOUD.on) return;
+  clearTimeout(CLOUD.pushTimer);
+  CLOUD.pushTimer = setTimeout(function(){
+    fetch("/api/state", {method:"PUT", headers: cloudHead(),
+      body: JSON.stringify({baseVersion: CLOUD.version, state: state})})
+    .then(function(r){
+      if(r.status===401){ askPasscode("That passcode was wrong — try again"); return; }
+      if(r.status===409){
+        return r.json().then(function(d){
+          cloudAdopt(d.state, d.version);
+          setSave("Another device saved a moment before you — showing its version", true);
+        });
+      }
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      return r.json().then(function(d){
+        CLOUD.version = d.version;
+        setSave("Saved ☁"); syncBtn("☁ Cloud","on");
+      });
+    })
+    .catch(function(){
+      syncBtn("☁ Offline","bad");
+      setSave("Offline — kept on this device, it will upload when you're back", true);
+    });
+  }, immediate===true ? 0 : 900);
+}
+(function detectCloud(){
+  fetch("/api/state", {headers: cloudHead()}).then(function(r){
+    if(r.status===404) return;                       // no API here (e.g. GitHub Pages) — stay local
+    CLOUD.on = true;
+    if(r.status===401){ askPasscode(); return; }
+    if(r.status===503){
+      return r.json().then(function(d){ syncBtn("☁ Setup","bad"); setSave(d.message||"Database not configured yet", true); });
+    }
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.json().then(function(d){
+      if(d.version===0){ CLOUD.version = 0; cloudPush(true); setSave("Database ready — this device's data is now the starting point ☁"); }
+      else { cloudAdopt(d.state, d.version); setSave("Loaded from your database ☁"); }
+      syncBtn("☁ Cloud","on");
+    });
+  }).catch(function(){ /* offline or no API: local saving carries on */ });
+})();
+setInterval(function(){ if(CLOUD.on && !document.hidden) cloudPull(true); }, 20000);
+document.addEventListener("visibilitychange", function(){ if(!document.hidden && CLOUD.on) cloudPull(true); });
+// in database mode the ☁ button explains itself instead of opening the gist setup
+(function(){
+  var btn = document.getElementById("syncbtn"), gistClick = btn.onclick;
+  btn.onclick = function(){
+    if(CLOUD.on){
+      askConfirm("☁ Connected to your database. Every change saves straight there, so every device is always up to date — nothing to sync. Press OK to re-enter the passcode.", function(yes){ if(yes) askPasscode(); });
+      return;
+    }
+    gistClick();
+  };
+})();
 
 refresh();
 renderHours();

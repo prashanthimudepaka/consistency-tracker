@@ -1236,26 +1236,20 @@ function renderTodos(){
   h += section("Left over", "⏳", leftover, leftover.length>0 || openSec===3, "Nothing left over — clean slate.", autoLeft);
   h += section("Backlog", "📦", backlog, openSec===2, "Backlog is empty.");
   h += section("Done", "✅", done, openSec===1, "Nothing marked done on this day yet.");
-  // Quick notes section
+  // Quick notes section with rich text
   if(!state.todoNotes) state.todoNotes = {};
-  var dayNotes = state.todoNotes[selIso] || [];
-  var notesHtml = "<div class='secpanel' style='border-top:1px solid var(--line); padding-top:14px; margin-top:14px;'>";
-  notesHtml += "<div style='display:flex; align-items:center; margin-bottom:10px;'>";
-  notesHtml += "<h3 style='margin:0; font-size:14px; flex:1;'>📝 Quick Notes</h3>";
-  notesHtml += "</div>";
-  if(dayNotes.length) {
-    dayNotes.forEach(function(note, ni){
-      notesHtml += "<div style='background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:flex-start;'>";
-      notesHtml += "<span style='flex:1; word-break:break-word; font-size:13px;'>"+esc(note)+"</span>";
-      notesHtml += "<button data-n='"+ni+"' style='background:none; border:none; color:var(--muted); cursor:pointer; padding:0; font-size:16px; margin-left:8px;'>✕</button>";
-      notesHtml += "</div>";
-    });
-  }
-  notesHtml += "<div style='display:flex; gap:6px;'>";
-  notesHtml += "<input type='text' id='noteInput' placeholder='Add a quick note...' style='flex:1; font-size:13px; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink);'>";
-  notesHtml += "<button id='noteAddBtn' style='padding:6px 12px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px;'>Add</button>";
-  notesHtml += "</div></div>";
-  h += notesHtml;
+  var dayNotes = state.todoNotes[selIso] || "";
+  var quickNotesHtml = "<div class='secpanel' style='border-top:1px solid var(--line); padding-top:14px; margin-top:14px;'>";
+  quickNotesHtml += "<div style='margin-bottom:8px;'>";
+  quickNotesHtml += "<button data-cmd='h3' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; margin-right:4px; cursor:pointer; font-weight:bold;'>H</button>";
+  quickNotesHtml += "<button data-cmd='bold' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; margin-right:4px; cursor:pointer; font-weight:bold;'>B</button>";
+  quickNotesHtml += "<button data-cmd='italic' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; margin-right:4px; cursor:pointer; font-style:italic;'>/</button>";
+  quickNotesHtml += "<button data-cmd='insertUnorderedList' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; margin-right:4px; cursor:pointer;'>• List</button>";
+  quickNotesHtml += "<button data-cmd='insertOrderedList' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; cursor:pointer;'>1. List</button>";
+  quickNotesHtml += "</div>";
+  quickNotesHtml += "<div id='quickNotesEditor' contenteditable='true' style='background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:10px; min-height:80px; font-size:13px; outline:none;'></div>";
+  quickNotesHtml += "</div>";
+  h += quickNotesHtml;
 
   openSec = null;
   document.getElementById("todolist").innerHTML = h;
@@ -1264,31 +1258,28 @@ function renderTodos(){
 }
 
 function attachNoteListeners(){
-  var addBtn = document.getElementById("noteAddBtn");
-  if(addBtn){
-    addBtn.onclick = function(){
-      var inp = document.getElementById("noteInput");
-      var txt = inp.value.trim();
-      if(!txt) return;
+  var editor = document.getElementById("quickNotesEditor");
+  if(editor){
+    var dayNotes = (state.todoNotes || {})[selIso] || "";
+    editor.innerHTML = dayNotes;
+    editor.addEventListener("input", function(){
       if(!state.todoNotes) state.todoNotes = {};
-      if(!state.todoNotes[selIso]) state.todoNotes[selIso] = [];
-      state.todoNotes[selIso].push(txt);
-      inp.value = "";
-      renderTodos();
+      var html = editor.innerHTML.trim();
+      if(html && html !== "<br>") state.todoNotes[selIso] = html;
+      else delete state.todoNotes[selIso];
       scheduleSave();
-    };
-    document.getElementById("noteInput").addEventListener("keypress", function(e){
-      if(e.key==="Enter"){ addBtn.click(); }
     });
   }
-  document.querySelectorAll("button[data-n]").forEach(function(btn){
-    btn.onclick = function(){
-      var ni = +btn.dataset.n;
-      if(!state.todoNotes || !state.todoNotes[selIso]) return;
-      state.todoNotes[selIso].splice(ni, 1);
-      if(!state.todoNotes[selIso].length) delete state.todoNotes[selIso];
-      renderTodos();
-      scheduleSave();
+  document.querySelectorAll("#todolist button[data-cmd]").forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      var cmd = btn.dataset.cmd;
+      if(cmd === "h3"){ document.execCommand("formatBlock", false, "<h3>"); }
+      else if(cmd === "bold"){ document.execCommand("bold"); }
+      else if(cmd === "italic"){ document.execCommand("italic"); }
+      else if(cmd === "insertUnorderedList"){ document.execCommand("insertUnorderedList"); }
+      else if(cmd === "insertOrderedList"){ document.execCommand("insertOrderedList"); }
+      document.getElementById("quickNotesEditor").focus();
     };
   });
 }

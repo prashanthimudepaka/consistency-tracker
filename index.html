@@ -325,6 +325,51 @@ tr.catrow td .cs{display:inline-flex;align-items:center;position:sticky;left:12p
 .plan .prm:hover{opacity:1}
 .plan .pin{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:17px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
 .boardempty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+/* --- plans dashboard --- */
+.planshead{margin-bottom:14px}
+.planshead h2{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:22px;margin:0}
+.planshead p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.psec{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:16px;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.pstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:10px;margin-bottom:4px}
+.pstat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;position:relative;overflow:hidden}
+.pstat::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--accent);opacity:.75}
+.pstat:nth-child(4n+2)::before{background:var(--half)}
+.pstat:nth-child(4n+3)::before{background:#4A90D9}
+.pstat:nth-child(4n)::before{background:var(--miss)}
+.pstat .e{font-size:17px;line-height:1}
+.pstat b{display:block;font-size:20px;font-family:"Fraunces",Georgia,serif;font-variant-numeric:tabular-nums;margin-top:2px}
+.pstat span{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.pstat .bar{margin-top:6px}
+.pweek{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.pwday{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 4px}
+.pwday.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.pwday.future{opacity:.5}
+.pwday .wd{font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.05em}
+.pwday .pc{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.pwday .pbar{width:8px;height:34px;background:var(--line);border-radius:4px;display:flex;align-items:flex-end;overflow:hidden}
+.pwday .pbar i{display:block;width:100%;background:var(--accent);border-radius:4px}
+.pwday .md{font-size:14px;min-height:18px;line-height:1.2}
+.plan .pst{position:absolute;top:6px;left:10px;border:0;background:rgba(255,255,255,.55);border-radius:999px;font-size:10px;font-weight:700;padding:3px 9px;cursor:pointer;color:inherit;letter-spacing:.03em}
+.plan .pst:hover{background:rgba(255,255,255,.85)}
+.plan .ptxt{margin-top:16px}
+.plan.done .ptxt{text-decoration:line-through;opacity:.65}
+@media (max-width:600px){
+  .pweek{gap:4px}
+  .pwday{padding:6px 2px}
+  .pstats{grid-template-columns:1fr 1fr}
+}
+/* --- plan note rich text --- */
+.plan .ptxt{outline:none;min-height:44px}
+.plan .ptxt:focus{background:rgba(255,255,255,.35);border-radius:6px}
+.plan:focus-within{transform:none;box-shadow:0 10px 24px rgba(0,0,0,.2);z-index:2}
+.plan .ptxt h3{font-family:"Fraunces",Georgia,serif;font-size:15px;margin:2px 0 4px}
+.plan .ptxt ul,.plan .ptxt ol{margin:2px 0;padding-left:20px}
+.plan .ptxt li{margin:1px 0}
+.plan .ptxt input.ncb{width:14px;height:14px;accent-color:#2E7D5B;vertical-align:-2px;margin-right:6px;cursor:pointer}
+.plan .ptxt .ckd{text-decoration:line-through;opacity:.6}
+#planbar{border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+.pcdot{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.25);padding:0;align-self:center;cursor:pointer;transition:transform .1s}
+.pcdot:hover{transform:scale(1.2)}
 /* --- strict mode --- */
 tr.locked td.cell,tr.locked td.wake,tr.locked td.mood{cursor:not-allowed}
 tr.locked td.cell:hover,tr.locked td.wake:hover,tr.locked td.mood:hover{background:inherit}
@@ -665,18 +710,45 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
   </div>
 
   <div id="tab-plans" hidden>
+    <div class="planshead">
+      <h2>📋 Plans &amp; Goals</h2>
+      <p>Dream it, pin it, move it along — your goals and your week, side by side.</p>
+    </div>
+    <div class="pstats" id="planstats"></div>
+    <div class="psec">📆 This week at a glance</div>
+    <div class="hcard" style="margin-bottom:6px"><div class="pweek" id="planweek"></div></div>
+    <div class="psec">🎨 Dream board<span class="spacer"></span><button id="pstages" style="font-weight:500;font-size:13px" title="Rename the three stages to anything you like">✎ Stages</button></div>
     <div class="addrow">
       <input id="newplan" placeholder="Write a plan, a goal, a dream… and press Enter" aria-label="New plan">
       <div class="swatches" id="swatches"></div>
       <button id="addplan" class="primary">Pin it</button>
     </div>
     <div class="legend">
-      <span class="k">🎨 pick a color, pin your plan to the board · click a note to edit · drag corner feel, zero pressure</span>
+      <span class="k">🎨 pick a color, pin it to the board · write straight onto a note · click the chip to move a plan through your three stages · ✎ Stages renames them</span>
     </div>
     <div style="display:flex; gap:8px; margin:12px 0; border-bottom:1px solid var(--line); padding-bottom:8px;">
       <button id="plan-monthly" class="plan-subtab active" style="background:none; border:none; padding:8px 12px; color:var(--accent); cursor:pointer; font-weight:bold;">📅 Monthly</button>
       <button id="plan-weekly" class="plan-subtab" style="background:none; border:none; padding:8px 12px; color:var(--muted); cursor:pointer; font-weight:bold;">📆 Weekly</button>
       <button id="plan-daily" class="plan-subtab" style="background:none; border:none; padding:8px 12px; color:var(--muted); cursor:pointer; font-weight:bold;">📋 Daily</button>
+    </div>
+    <div class="notebar" id="planbar">
+      <button data-cmd="h" title="Heading">H</button>
+      <button data-cmd="p" title="Normal text">¶</button>
+      <span class="sep"></span>
+      <button data-cmd="bold" title="Bold"><b>B</b></button>
+      <button data-cmd="italic" title="Italic"><i>I</i></button>
+      <span class="sep"></span>
+      <button data-cmd="ul" title="Bullet list">• List</button>
+      <button data-cmd="ol" title="Numbered list">1. List</button>
+      <button data-cmd="ck" title="Insert a checkbox">☑ Check</button>
+      <span class="sep"></span>
+      <button class="pcdot" data-fc="#243029" style="background:#243029" title="Ink"></button>
+      <button class="pcdot" data-fc="#2E7D5B" style="background:#2E7D5B" title="Forest"></button>
+      <button class="pcdot" data-fc="#B45309" style="background:#B45309" title="Amber"></button>
+      <button class="pcdot" data-fc="#B5544B" style="background:#B5544B" title="Rose"></button>
+      <button class="pcdot" data-fc="#1D4ED8" style="background:#1D4ED8" title="Blue"></button>
+      <button class="pcdot" data-fc="#6D28D9" style="background:#6D28D9" title="Violet"></button>
+      <span style="font-size:11px;color:var(--muted);align-self:center;margin-left:4px">click into a note, then format</span>
     </div>
     <div class="board" id="plansboard"></div>
   </div>
@@ -803,7 +875,7 @@ function doPublish(){
   document.getElementById("state").textContent = JSON.stringify(state).replace(/</g,"\\u003c");
   // serialize a CLONE so the live page (focus, open dialog, half-typed text) is never disturbed
   var clone = document.documentElement.cloneNode(true);
-  clone.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard,#home,#notes,#spread,#habitgrid,#journalcard").forEach(function(el){ el.innerHTML=""; });
+  clone.querySelectorAll(".stats,#grid,#hourgrid,#todolist,#heatmap,#plansboard,#planstats,#planweek,#home,#notes,#spread,#habitgrid,#journalcard").forEach(function(el){ el.innerHTML=""; });
   clone.querySelectorAll(".floaty,#confetti").forEach(function(el){ el.remove(); });
   var dlg = clone.querySelector("#dlg"); if(dlg) dlg.hidden = true;
   ["home","daily","spread","jar","habits","hourly","todos","plans"].forEach(function(k){
@@ -2081,9 +2153,65 @@ function renderSwatches(){
     return "<button class='sw"+(i===planColor?" sel":"")+"' data-c='"+i+"' style='background:"+c+"' title='Note color'></button>";
   }).join("");
 }
+var PSTAT_E = ["💭","🚀","✅"], PSTAT_DEF = ["Dream","Doing","Done"];
+function pstatNames(){ return (state.ui && state.ui.pstat && state.ui.pstat.length===3) ? state.ui.pstat : PSTAT_DEF; }
+function pstatLabel(i){ return PSTAT_E[i]+" "+esc(pstatNames()[i]); }
+function planArrayName(){ return "plans" + planPeriod.charAt(0).toUpperCase() + planPeriod.slice(1); }
+function planWeekStats(){
+  var all = [].concat(state.plansMonthly||[], state.plansWeekly||[], state.plansDaily||[], state.plans||[]);
+  var done=0, doing=0;
+  all.forEach(function(p){ if(p.s===2) done++; else if(p.s===1) doing++; });
+  var today = today0();
+  var elapsed = Math.max(1, Math.min(DAYS, dayIndex(clampDate(today))+1));
+  var nt = state.tasks.length, streak=0;
+  for(var i=elapsed-1;i>=0;i--){
+    var dIso = iso(addDays(START,i)), any=false;
+    for(var t=0;t<nt;t++){ if(score(getMark(dIso,t))>0){any=true;break;} }
+    if(any) streak++; else break;
+  }
+  var ws = weekStart(today), hbs = habitsList();
+  var tdone=0, jars=0, hDone=0, hTot=0;
+  for(var k=0;k<7;k++){
+    var d = addDays(ws,k); if(d>today) break;
+    var dI = iso(d);
+    jars += dayMap("jars")[dI]||0;
+    hbs.forEach(function(hb){ hTot++; if(habitDone(hb, habitLog(dI)[hb.id])) hDone++; });
+  }
+  var wsIso = iso(ws);
+  (state.todos||[]).forEach(function(it){ if(it.s===1 && it.d>=wsIso) tdone++; });
+  return {total:all.length, done:done, doing:doing, streak:streak,
+          tdone:tdone, jars:jars, hpct: hTot?Math.round(hDone/hTot*100):0};
+}
+function renderPlanStats(){
+  var s = planWeekStats();
+  function pcard(e,v,l,frac){
+    return "<div class='pstat'><span class='e'>"+e+"</span><b>"+v+"</b><span>"+l+"</span>"+
+      (frac!=null?"<div class='bar'><i style='width:"+(Math.min(1,frac)*100).toFixed(0)+"%'></i></div>":"")+"</div>";
+  }
+  document.getElementById("planstats").innerHTML =
+    pcard("🎯", s.total, "plans pinned", null)+
+    pcard("🚀", s.doing, "in motion", null)+
+    pcard("✅", s.done+(s.total?" / "+s.total:""), "plans done", s.total?s.done/s.total:0)+
+    pcard((s.streak>=3?"<span class='flame'>🔥</span>":"🔥"), s.streak+"d", "current streak", null)+
+    pcard("☑️", s.tdone, "to-dos done this week", null)+
+    pcard("🌿", s.hpct+"%", "habits this week", s.hpct/100)+
+    pcard("⏳", s.jars, "focus jars this week", null);
+  var ws = weekStart(today0()), tI = iso(today0()), today = today0(), h = "";
+  for(var i=0;i<7;i++){
+    var d = addDays(ws,i), dI = iso(d), fut = d>today;
+    var r = dayPct(dI), mv = (state.mood||{})[dI];
+    h += "<div class='pwday"+(dI===tI?" today":"")+(fut?" future":"")+"' title='"+dI+"'>"+
+      "<span class='wd'>"+WD[d.getDay()]+"</span>"+
+      "<span class='pc'>"+(fut?"·":Math.round(r.pct*100)+"%")+"</span>"+
+      "<div class='pbar'><i style='height:"+(fut?0:(r.pct*100).toFixed(0))+"%'></i></div>"+
+      "<span class='md'>"+(mv?MOODS[mv]:"")+"</span></div>";
+  }
+  document.getElementById("planweek").innerHTML = h;
+}
 function renderPlans(){
   migratePlans();  // Migrate old plans on first render
   renderSwatches();
+  renderPlanStats();
   // Update sub-tab styling
   ["monthly","weekly","daily"].forEach(function(p){
     var btn = document.getElementById("plan-"+p);
@@ -2096,18 +2224,18 @@ function renderPlans(){
     }
   });
   
-  // Get the correct array for current period
-  var arrayName = "plans" + planPeriod.charAt(0).toUpperCase() + planPeriod.slice(1);
-  var list = state[arrayName] || [];
+  var list = state[planArrayName()] || [];
   var el = document.getElementById("plansboard");
   if(!list.length){
     el.innerHTML = "<div class='boardempty'>🎨 Your plan board is empty.<br>Write a goal above, pick a color, and pin it.</div>";
     return;
   }
   el.innerHTML = list.map(function(p,i){
-    return "<div class='plan' style='background:"+PCOLORS[p.c||0]+"'>"+
+    var st = p.s||0;
+    return "<div class='plan"+(st===2?" done":"")+"' style='background:"+PCOLORS[p.c||0]+"'>"+
       "<span class='pin'>"+PPINS[p.c||0]+"</span>"+
-      "<div class='ptxt' data-i='"+i+"' tabindex='0' role='button' title='Edit'>"+esc(p.t)+"</div>"+
+      "<button class='pst' data-i='"+i+"' title='Move it along: "+esc(pstatNames().join(" → "))+"'>"+pstatLabel(st)+"</button>"+
+      "<div class='ptxt' data-i='"+i+"' contenteditable='true' spellcheck='false'>"+(p.h!=null?p.h:esc(p.t))+"</div>"+
       "<span class='pdate'>"+esc(p.d||"")+"</span>"+
       "<button class='prm' data-i='"+i+"' title='Remove'>✕</button></div>";
   }).join("");
@@ -2134,7 +2262,22 @@ document.getElementById("newplan").addEventListener("keydown", function(e){
   if(e.key==="Enter") addPlan();
 });
 document.getElementById("plansboard").addEventListener("click", function(e){
-  var arrayName = "plans" + planPeriod.charAt(0).toUpperCase() + planPeriod.slice(1);
+  var arrayName = planArrayName();
+  var st = e.target.closest(".pst");
+  if(st){
+    var sp = state[arrayName][+st.dataset.i];
+    sp.s = ((sp.s||0)+1)%3;
+    if(sp.s===2){ confetti(); floaty("🎉", e.clientX||innerWidth/2, e.clientY||innerHeight/2); }
+    renderPlans(); scheduleSave(); return;
+  }
+  var ck = e.target.closest("input.ncb");
+  if(ck && ck.closest(".ptxt")){
+    if(ck.checked) ck.setAttribute("checked",""); else ck.removeAttribute("checked");
+    var lbl = ck.parentElement;
+    if(lbl && lbl.classList) lbl.classList.toggle("ckd", ck.checked);
+    savePlanTxt(ck.closest(".ptxt"));
+    return;
+  }
   var rm = e.target.closest(".prm");
   if(rm){
     var i = +rm.dataset.i;
@@ -2143,14 +2286,63 @@ document.getElementById("plansboard").addEventListener("click", function(e){
     });
     return;
   }
-  var tx = e.target.closest(".ptxt");
-  if(tx){
-    var p = state[arrayName][+tx.dataset.i];
-    askText("Edit plan", p.t, function(n){
-      if(n && n.trim()){ p.t = n.trim(); renderPlans(); scheduleSave(); }
-    });
-  }
 });
+function savePlanTxt(t){
+  var p = (state[planArrayName()]||[])[+t.dataset.i]; if(!p) return;
+  p.h = t.innerHTML;
+  p.t = t.textContent.trim().slice(0,400);
+  scheduleSave();
+}
+document.getElementById("plansboard").addEventListener("input", function(e){
+  var t = e.target.closest(".ptxt"); if(t) savePlanTxt(t);
+});
+var planFocus = null;
+document.getElementById("plansboard").addEventListener("focusin", function(e){
+  var t = e.target.closest(".ptxt"); if(t) planFocus = t;
+});
+document.querySelectorAll("#planbar button").forEach(function(b){
+  b.addEventListener("mousedown", function(e){ e.preventDefault(); });  // keep note focus
+  b.addEventListener("click", function(){
+    var t = (document.activeElement && document.activeElement.closest ? document.activeElement.closest(".ptxt") : null) || planFocus;
+    if(!t || !document.getElementById("plansboard").contains(t)){
+      setSave("Click into a note first, then format", true);
+      setTimeout(function(){ setSave("Saved ✓"); }, 2200);
+      return;
+    }
+    t.focus();
+    var c = b.dataset.cmd, fc = b.dataset.fc;
+    if(fc) document.execCommand("foreColor", false, fc);
+    else if(c==="h") document.execCommand("formatBlock", false, "<h3>");
+    else if(c==="p") document.execCommand("formatBlock", false, "<p>");
+    else if(c==="bold") document.execCommand("bold");
+    else if(c==="italic") document.execCommand("italic");
+    else if(c==="ul") document.execCommand("insertUnorderedList");
+    else if(c==="ol") document.execCommand("insertOrderedList");
+    else if(c==="ck") document.execCommand("insertHTML", false,
+      "<div><input type='checkbox' class='ncb' contenteditable='false'>&nbsp;</div>");
+    savePlanTxt(t);
+  });
+});
+document.getElementById("pstages").onclick = function(){
+  askText("Name your three stages (comma-separated)", pstatNames().join(", "), function(v){
+    if(v===null) return;
+    if(!state.ui) state.ui = {};
+    if(!v.trim()){ delete state.ui.pstat; renderPlans(); scheduleSave(); return; }
+    var parts = v.split(",").map(function(x){ return x.trim(); }).filter(Boolean);
+    if(parts.length!==3){
+      setSave("Give exactly three names, separated by commas — e.g. Idea, Building, Shipped", true);
+      setTimeout(function(){ setSave("Saved ✓"); }, 3000);
+      return;
+    }
+    state.ui.pstat = parts.map(function(x){ return x.slice(0,24); });
+    renderPlans(); scheduleSave();
+  }, [
+    {label:"💭 Dream · Doing · Done", value:"Dream, Doing, Done"},
+    {label:"💡 Idea · Building · Shipped", value:"Idea, Building, Shipped"},
+    {label:"🗓 Someday · This week · Done", value:"Someday, This week, Done"},
+    {label:"🌱 Seed · Growing · Bloomed", value:"Seed, Growing, Bloomed"}
+  ]);
+};
 // Plan period tab switchers
 ["monthly","weekly","daily"].forEach(function(period){
   var btn = document.getElementById("plan-"+period);

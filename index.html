@@ -1186,7 +1186,7 @@ function itemRow(i, autoLeft){
 function groupedRows(indices, autoSet){
   var list = state.todos;
   indices.sort(function(a,b){
-    return list[b].d===list[a].d ? a-b : (list[b].d < list[a].d ? -1 : 1);
+    return list[a].d===list[b].d ? a-b : (list[a].d < list[b].d ? -1 : 1);
   });
   var h = "", lastDate = null;
   indices.forEach(function(i){

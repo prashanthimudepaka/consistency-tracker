@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
     if (action === 'logout') {
       const token = readToken(req);
-      if (token) await sql`delete from sessions where token = ${token}`;
+      if (token) await sql`delete from tracker_sessions where token = ${token}`;
       clearSession(res);
       return res.status(200).json({ ok: true });
     }
@@ -52,18 +52,18 @@ export default async function handler(req, res) {
       if (password.length < 6) {
         return res.status(400).json({ error: 'password', message: 'Password needs at least 6 characters.' });
       }
-      const taken = await sql`select 1 from users where username = ${username}`;
+      const taken = await sql`select 1 from tracker_users where username = ${username}`;
       if (taken.length) {
         return res.status(409).json({ error: 'taken', message: 'That username is already taken — sign in instead?' });
       }
       const id = 'u_' + crypto.randomBytes(12).toString('hex');
-      await sql`insert into users (id, username, pass_hash) values (${id}, ${username}, ${hashPassword(password)})`;
+      await sql`insert into tracker_users (id, username, pass_hash) values (${id}, ${username}, ${hashPassword(password)})`;
       await newSession(sql, res, id);
       return res.status(200).json({ user: username, fresh: true });
     }
 
     if (action === 'login') {
-      const rows = await sql`select id, pass_hash from users where username = ${username}`;
+      const rows = await sql`select id, pass_hash from tracker_users where username = ${username}`;
       if (!rows.length || !verifyPassword(password, rows[0].pass_hash)) {
         return res.status(401).json({ error: 'auth', message: 'Wrong username or password.' });
       }

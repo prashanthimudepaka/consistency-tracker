@@ -19,13 +19,13 @@ let schemaReady = false;
 export async function db() {
   const sql = neon(CONNECTION);
   if (!schemaReady) {
-    await sql`create table if not exists users (
+    await sql`create table if not exists tracker_users (
       id        text        primary key,
       username  text        not null unique,
       pass_hash text        not null,
       created   timestamptz not null default now()
     )`;
-    await sql`create table if not exists sessions (
+    await sql`create table if not exists tracker_sessions (
       token   text        primary key,
       user_id text        not null,
       created timestamptz not null default now()
@@ -87,7 +87,7 @@ export function clearSession(res) {
 
 export async function newSession(sql, res, userId) {
   const token = crypto.randomBytes(32).toString('base64url').replace(/[^A-Za-z0-9]/g, '');
-  await sql`insert into sessions (token, user_id) values (${token}, ${userId})`;
+  await sql`insert into tracker_sessions (token, user_id) values (${token}, ${userId})`;
   setSession(res, token);
 }
 
@@ -96,7 +96,7 @@ export async function currentUser(sql, req) {
   if (!token) return null;
   const rows = await sql`
     select u.id, u.username
-    from sessions s join users u on u.id = s.user_id
+    from tracker_sessions s join tracker_users u on u.id = s.user_id
     where s.token = ${token}`;
   return rows.length ? rows[0] : null;
 }

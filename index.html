@@ -1236,18 +1236,32 @@ function renderTodos(){
   h += section("Left over", "⏳", leftover, leftover.length>0 || openSec===3, "Nothing left over — clean slate.", autoLeft);
   h += section("Backlog", "📦", backlog, openSec===2, "Backlog is empty.");
   h += section("Done", "✅", done, openSec===1, "Nothing marked done on this day yet.");
-  // Quick notes section with rich text
+  // Quick notes section - list of rich text notes
   if(!state.todoNotes) state.todoNotes = {};
-  var dayNotes = state.todoNotes[selIso] || "";
+  var dayNotes = state.todoNotes[selIso] || [];
   var quickNotesHtml = "<div class='secpanel' style='border-top:1px solid var(--line); padding-top:14px; margin-top:14px;'>";
-  quickNotesHtml += "<div style='margin-bottom:8px;'>";
-  quickNotesHtml += "<button data-cmd='h3' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; margin-right:4px; cursor:pointer; font-weight:bold;'>H</button>";
-  quickNotesHtml += "<button data-cmd='bold' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; margin-right:4px; cursor:pointer; font-weight:bold;'>B</button>";
-  quickNotesHtml += "<button data-cmd='italic' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; margin-right:4px; cursor:pointer; font-style:italic;'>/</button>";
-  quickNotesHtml += "<button data-cmd='insertUnorderedList' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; margin-right:4px; cursor:pointer;'>• List</button>";
-  quickNotesHtml += "<button data-cmd='insertOrderedList' style='background:var(--panel); border:1px solid var(--line); padding:4px 8px; cursor:pointer;'>1. List</button>";
+  quickNotesHtml += "<div style='display:flex; align-items:center; margin-bottom:10px;'>";
+  quickNotesHtml += "<h3 style='margin:0; font-size:14px; flex:1;'>📝 Quick Notes</h3>";
   quickNotesHtml += "</div>";
-  quickNotesHtml += "<div id='quickNotesEditor' contenteditable='true' style='background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:10px; min-height:80px; font-size:13px; outline:none;'></div>";
+  if(dayNotes.length) {
+    dayNotes.forEach(function(note, ni){
+      quickNotesHtml += "<div class='qnote' data-ni='"+ni+"' style='background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px; margin-bottom:8px;'>";
+      quickNotesHtml += "<div style='display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;'>";
+      quickNotesHtml += "<div style='display:flex; gap:4px; flex:1;'>";
+      quickNotesHtml += "<button data-cmd='h3' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-weight:bold; color:var(--muted); font-size:11px;'>H</button>";
+      quickNotesHtml += "<button data-cmd='bold' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-weight:bold; color:var(--muted); font-size:11px;'>B</button>";
+      quickNotesHtml += "<button data-cmd='italic' data-ni='"+ni+"' style='background:none; border:none; padding:2px 4px; cursor:pointer; font-style:italic; color:var(--muted); font-size:11px;'>/</button>";
+      quickNotesHtml += "</div>";
+      quickNotesHtml += "<button data-del='"+ni+"' style='background:none; border:none; color:var(--muted); cursor:pointer; padding:0; font-size:16px;'>✕</button>";
+      quickNotesHtml += "</div>";
+      quickNotesHtml += "<div class='qnote-editor' data-ni='"+ni+"' contenteditable='true' style='background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:6px; font-size:13px; min-height:40px; outline:none; word-break:break-word;'></div>";
+      quickNotesHtml += "</div>";
+    });
+  }
+  quickNotesHtml += "<div style='display:flex; gap:6px; margin-top:10px;'>";
+  quickNotesHtml += "<input type='text' id='newNoteInput' placeholder='Add a new quick note...' style='flex:1; font-size:13px; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink);'>";
+  quickNotesHtml += "<button id='addNoteBtn' style='padding:6px 12px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px;'>Add</button>";
+  quickNotesHtml += "</div>";
   quickNotesHtml += "</div>";
   h += quickNotesHtml;
 
@@ -1258,28 +1272,63 @@ function renderTodos(){
 }
 
 function attachNoteListeners(){
-  var editor = document.getElementById("quickNotesEditor");
-  if(editor){
-    var dayNotes = (state.todoNotes || {})[selIso] || "";
-    editor.innerHTML = dayNotes;
+  // Load existing notes into editors
+  document.querySelectorAll(".qnote-editor").forEach(function(editor){
+    var ni = +editor.dataset.ni;
+    if(state.todoNotes && state.todoNotes[selIso] && state.todoNotes[selIso][ni]){
+      editor.innerHTML = state.todoNotes[selIso][ni];
+    }
     editor.addEventListener("input", function(){
       if(!state.todoNotes) state.todoNotes = {};
-      var html = editor.innerHTML.trim();
-      if(html && html !== "<br>") state.todoNotes[selIso] = html;
-      else delete state.todoNotes[selIso];
+      if(!state.todoNotes[selIso]) state.todoNotes[selIso] = [];
+      state.todoNotes[selIso][ni] = editor.innerHTML.trim();
       scheduleSave();
     });
+  });
+  
+  // Add button
+  var addBtn = document.getElementById("addNoteBtn");
+  if(addBtn){
+    addBtn.onclick = function(){
+      var inp = document.getElementById("newNoteInput");
+      var txt = inp.value.trim();
+      if(!txt) return;
+      if(!state.todoNotes) state.todoNotes = {};
+      if(!state.todoNotes[selIso]) state.todoNotes[selIso] = [];
+      state.todoNotes[selIso].push(txt);
+      inp.value = "";
+      renderTodos();
+      scheduleSave();
+    };
+    document.getElementById("newNoteInput").addEventListener("keypress", function(e){
+      if(e.key==="Enter"){ addBtn.click(); }
+    });
   }
+  
+  // Format buttons
   document.querySelectorAll("#todolist button[data-cmd]").forEach(function(btn){
     btn.onclick = function(e){
       e.preventDefault();
       var cmd = btn.dataset.cmd;
+      var ni = btn.dataset.ni;
+      var editor = document.querySelector(".qnote-editor[data-ni='"+ni+"']");
+      if(editor) editor.focus();
       if(cmd === "h3"){ document.execCommand("formatBlock", false, "<h3>"); }
       else if(cmd === "bold"){ document.execCommand("bold"); }
       else if(cmd === "italic"){ document.execCommand("italic"); }
-      else if(cmd === "insertUnorderedList"){ document.execCommand("insertUnorderedList"); }
-      else if(cmd === "insertOrderedList"){ document.execCommand("insertOrderedList"); }
-      document.getElementById("quickNotesEditor").focus();
+    };
+  });
+  
+  // Delete buttons
+  document.querySelectorAll("button[data-del]").forEach(function(btn){
+    btn.onclick = function(){
+      var ni = +btn.dataset.del;
+      if(state.todoNotes && state.todoNotes[selIso]){
+        state.todoNotes[selIso].splice(ni, 1);
+        if(!state.todoNotes[selIso].length) delete state.todoNotes[selIso];
+        renderTodos();
+        scheduleSave();
+      }
     };
   });
 }

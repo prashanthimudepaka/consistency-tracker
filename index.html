@@ -727,7 +727,7 @@ td.cell:active,td.mood:active,td.wake:active{transform:scale(1.18)}
       <span class="k">🎨 pick a color, pin it to the board · write straight onto a note · click the chip to move a plan through your three stages · ✎ Stages renames them</span>
     </div>
     <div style="display:flex; gap:8px; margin:12px 0; border-bottom:1px solid var(--line); padding-bottom:8px;">
-      <button id="plan-monthly" class="plan-subtab active" style="background:none; border:none; padding:8px 12px; color:var(--accent); cursor:pointer; font-weight:bold;">📅 Monthly</button>
+      <button id="plan-monthly" class="plan-subtab active" style="background:var(--accent); border:none; padding:8px 12px; color:#fff; cursor:pointer; font-weight:bold; border-radius:6px;">📅 Monthly</button>
       <button id="plan-weekly" class="plan-subtab" style="background:none; border:none; padding:8px 12px; color:var(--muted); cursor:pointer; font-weight:bold;">📆 Weekly</button>
       <button id="plan-daily" class="plan-subtab" style="background:none; border:none; padding:8px 12px; color:var(--muted); cursor:pointer; font-weight:bold;">📋 Daily</button>
     </div>
@@ -2217,8 +2217,11 @@ function renderPlans(){
     var btn = document.getElementById("plan-"+p);
     if(btn){
       if(p === planPeriod){
-        btn.style.color = "var(--accent)";
+        btn.style.background = "var(--accent)";
+        btn.style.color = "#fff";
+        btn.style.borderRadius = "6px";
       } else {
+        btn.style.background = "none";
         btn.style.color = "var(--muted)";
       }
     }

@@ -2068,12 +2068,21 @@ var PCOLORS = ["#FFF3B0","#FFD6E0","#CDE7FF","#D6F5DD","#E6DAFF","#FFE0C2"];
 var PPINS = ["📌","🌟","💡","🌱","💜","🔥"];
 var planColor = 0;
 var planPeriod = "monthly";  // monthly, weekly, or daily
+function migratePlans(){
+  // Move old plans array to plansMonthly if needed
+  if(state.plans && state.plans.length && !state.plansMonthly){
+    state.plansMonthly = state.plans;
+    delete state.plans;
+    scheduleSave();
+  }
+}
 function renderSwatches(){
   document.getElementById("swatches").innerHTML = PCOLORS.map(function(c,i){
     return "<button class='sw"+(i===planColor?" sel":"")+"' data-c='"+i+"' style='background:"+c+"' title='Note color'></button>";
   }).join("");
 }
 function renderPlans(){
+  migratePlans();  // Migrate old plans on first render
   renderSwatches();
   // Update sub-tab styling
   ["monthly","weekly","daily"].forEach(function(p){

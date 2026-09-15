@@ -1,73 +1,27 @@
-// Single source of truth for the tracker: one row in Neon Postgres.
+// The signed-in user's tracker data: one row per account in Neon Postgres.
 //
 //   GET  /api/state            -> { version, updated, state }   (version 0 = nothing stored yet)
 //   PUT  /api/state            -> { baseVersion, state }
 //                                 200 { version }               saved
-//                                 409 { version, state }        someone else saved first; here is theirs
+//                                 409 { version, state }        another device saved first; here is its version
 //
-// Every request must carry the passcode in an `x-passcode` header, checked against
-// the APP_PASSCODE environment variable. Without both env vars set the API refuses
-// to do anything rather than exposing the data.
+// Requests are authenticated by the session cookie set by /api/auth.
 
-import { neon } from '@neondatabase/serverless';
-
-const CONNECTION =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL ||
-  process.env.NEON_DATABASE_URL ||
-  process.env.DATABASE_URL_UNPOOLED ||
-  '';
-
-const ROW_ID = 'default';
-let schemaReady = false;
-
-async function db() {
-  const sql = neon(CONNECTION);
-  if (!schemaReady) {
-    await sql`create table if not exists tracker_state (
-      id      text primary key,
-      version integer      not null default 1,
-      updated timestamptz  not null default now(),
-      data    jsonb        not null
-    )`;
-    schemaReady = true;
-  }
-  return sql;
-}
-
-// length-independent comparison so the passcode can't be guessed a character at a time
-function sameSecret(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
+import { db, notConfigured, currentUser } from './_db.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-
-  const passcode = process.env.APP_PASSCODE || '';
-  if (!passcode) {
-    return res.status(503).json({
-      error: 'setup',
-      message: 'APP_PASSCODE is not set on this deployment. Add it in Vercel → Settings → Environment Variables, then redeploy.'
-    });
-  }
-  if (!CONNECTION) {
-    return res.status(503).json({
-      error: 'setup',
-      message: 'No database URL found. Connect a Neon database in Vercel → Storage (it sets DATABASE_URL), then redeploy.'
-    });
-  }
-  if (!sameSecret(String(req.headers['x-passcode'] || ''), passcode)) {
-    return res.status(401).json({ error: 'passcode', message: 'Wrong or missing passcode.' });
-  }
+  if (notConfigured(res)) return;
 
   try {
     const sql = await db();
 
+    const user = await currentUser(sql, req);
+    if (!user) return res.status(401).json({ error: 'auth', message: 'Not signed in.' });
+    const rowId = user.id;
+
     if (req.method === 'GET') {
-      const rows = await sql`select version, updated, data from tracker_state where id = ${ROW_ID}`;
+      const rows = await sql`select version, updated, data from tracker_state where id = ${rowId}`;
       if (!rows.length) return res.status(200).json({ version: 0, updated: null, state: null });
       return res.status(200).json({
         version: rows[0].version,
@@ -88,7 +42,7 @@ export default async function handler(req, res) {
       // saved since the version this client last read.
       const saved = await sql`
         insert into tracker_state (id, version, updated, data)
-        values (${ROW_ID}, 1, now(), ${JSON.stringify(state)}::jsonb)
+        values (${rowId}, 1, now(), ${JSON.stringify(state)}::jsonb)
         on conflict (id) do update
           set version = tracker_state.version + 1,
               updated = now(),
@@ -98,7 +52,7 @@ export default async function handler(req, res) {
 
       if (saved.length) return res.status(200).json({ version: saved[0].version });
 
-      const current = await sql`select version, data from tracker_state where id = ${ROW_ID}`;
+      const current = await sql`select version, data from tracker_state where id = ${rowId}`;
       return res.status(409).json({
         error: 'conflict',
         version: current[0].version,

@@ -2315,47 +2315,119 @@ if(GH_TOKEN && GIST_ID){ syncBtn("☁ Syncing…",""); syncPull(); }
 setInterval(function(){ if(syncFails < 3) syncPull(); }, 45000);
 document.addEventListener("visibilitychange", function(){ if(!document.hidden && syncFails < 3) syncPull(); });
 
-// ---------- cloud storage: one database behind /api/state (Vercel + Neon) ----------
+// ---------- cloud storage: your account behind /api (Vercel + Neon) ----------
 // When this page is served somewhere that has the API, the database is the single
-// source of truth — every device reads and writes the same row, so there is nothing
-// to sync and nothing to reconcile. On plain static hosting the call 404s and the
-// page quietly carries on saving locally.
-var CLOUD = {on:false, version:0, pass:"", pushTimer:null, pulling:false};
-try{ CLOUD.pass = localStorage.getItem("ct365_pass")||""; }catch(e){}
-function cloudHead(){
-  var h = {"Content-Type":"application/json"};
-  if(CLOUD.pass) h["x-passcode"] = CLOUD.pass;
-  return h;
-}
+// source of truth — every device signed into the same account reads and writes the
+// same row, so there is nothing to sync and nothing to reconcile. On plain static
+// hosting the probe 404s and the page quietly carries on saving locally.
+var CLOUD = {on:false, version:0, user:"", pushTimer:null, pulling:false};
+try{ localStorage.removeItem("ct365_pass"); }catch(e){}   // passcode from the old scheme — no longer used
 function cloudAdopt(remote, version){
   CLOUD.version = version;
   state = remote;
   try{ localStorage.setItem("ct365", JSON.stringify(state)); }catch(e){}
   rerenderAll();
 }
-function askPasscode(msg){
-  syncBtn("☁ Locked","bad");
-  askText(msg || "Passcode for your tracker", "", function(v){
-    if(v===null || !v.trim()) return;
-    CLOUD.pass = v.trim();
-    try{ localStorage.setItem("ct365_pass", CLOUD.pass); }catch(e){}
-    cloudPull();
-  });
+
+// ---- sign in / sign up screen ----
+var AUTH_MODE = "login";
+function authEl(){
+  var v = document.getElementById("authveil");
+  if(v) return v;
+  v = document.createElement("div");
+  v.id = "authveil";
+  v.innerHTML =
+    '<style>' +
+    '#authveil{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}' +
+    '#authveil .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 26px;width:100%;max-width:340px;box-shadow:0 12px 40px rgba(0,0,0,.08);text-align:center}' +
+    '#authveil h2{margin:6px 0 2px;font-size:20px}' +
+    '#authveil .sub{color:var(--muted);font-size:13px;margin:0 0 18px}' +
+    '#authveil input{display:block;width:100%;box-sizing:border-box;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 10px;outline:none}' +
+    '#authveil input:focus{border-color:var(--accent)}' +
+    '#authveil .autherr{color:#C0392B;font-size:13px;min-height:18px;margin:0 0 8px}' +
+    '#authveil button.primary{width:100%;padding:10px;border-radius:8px;font-weight:600}' +
+    '#authveil .swap{border:0;background:none;color:var(--accent);margin-top:14px;font-size:13px;text-decoration:underline;cursor:pointer}' +
+    '</style>' +
+    '<form class="card" id="authform">' +
+    '<div style="font-size:30px">🌱</div>' +
+    '<h2 id="authtitle">Welcome back</h2>' +
+    '<p class="sub" id="authsub">Sign in to open your tracker</p>' +
+    '<input id="authuser" placeholder="Username" autocomplete="username" autocapitalize="none" spellcheck="false">' +
+    '<input id="authpass" type="password" placeholder="Password" autocomplete="current-password">' +
+    '<div class="autherr" id="autherr"></div>' +
+    '<button type="submit" class="primary" id="authgo">Sign in</button>' +
+    '<button type="button" class="swap" id="authswap">New here? Create an account</button>' +
+    '</form>';
+  document.body.appendChild(v);
+  document.getElementById("authform").onsubmit = function(e){ e.preventDefault(); authSubmit(); };
+  document.getElementById("authswap").onclick = function(){ authMode(AUTH_MODE==="login" ? "signup" : "login"); };
+  return v;
 }
-function cloudPull(silent){
+function authMode(m){
+  AUTH_MODE = m;
+  document.getElementById("authtitle").textContent = m==="login" ? "Welcome back" : "Create your account";
+  document.getElementById("authsub").textContent   = m==="login" ? "Sign in to open your tracker" : "One account, every device — same data everywhere";
+  document.getElementById("authgo").textContent    = m==="login" ? "Sign in" : "Create account";
+  document.getElementById("authswap").textContent  = m==="login" ? "New here? Create an account" : "Already have an account? Sign in";
+  document.getElementById("autherr").textContent   = "";
+  var p = document.getElementById("authpass");
+  p.setAttribute("autocomplete", m==="login" ? "current-password" : "new-password");
+}
+function authShow(msg){
+  var v = authEl();
+  v.hidden = false;
+  syncBtn("☁ Locked","bad");
+  if(msg) document.getElementById("autherr").textContent = msg;
+  setTimeout(function(){ document.getElementById("authuser").focus(); }, 30);
+}
+function authHide(){ var v = document.getElementById("authveil"); if(v) v.hidden = true; }
+function authSubmit(){
+  var u = document.getElementById("authuser").value.trim();
+  var p = document.getElementById("authpass").value;
+  var err = document.getElementById("autherr");
+  if(!u || !p){ err.textContent = "Fill in both fields"; return; }
+  var go = document.getElementById("authgo");
+  go.disabled = true;
+  fetch("/api/auth", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({action: AUTH_MODE, username: u, password: p})})
+  .then(function(r){ return r.json().then(function(d){ return {ok: r.ok, d: d}; }); })
+  .then(function(x){
+    go.disabled = false;
+    if(!x.ok){ err.textContent = x.d.message || "That didn't work — try again"; return; }
+    CLOUD.user = x.d.user;
+    document.getElementById("authpass").value = "";
+    authHide();
+    CLOUD.version = 0;
+    cloudPull(false, true);
+  })
+  .catch(function(){ go.disabled = false; err.textContent = "Can't reach the server — check your connection"; });
+}
+function signOut(){
+  fetch("/api/auth", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({action:"logout"})})
+  .then(function(){ CLOUD.user = ""; CLOUD.version = 0; authMode("login"); authShow(); })
+  .catch(function(){ authShow(); });
+}
+
+function cloudPull(silent, first){
   if(!CLOUD.on || CLOUD.pulling) return Promise.resolve();
   CLOUD.pulling = true;
-  return fetch("/api/state", {headers: cloudHead()}).then(function(r){
+  return fetch("/api/state").then(function(r){
     CLOUD.pulling = false;
-    if(r.status===401){ askPasscode("That passcode was wrong — try again"); return; }
+    if(r.status===401){ authShow("Your session ended — sign in again"); return; }
     if(!r.ok) throw new Error("HTTP "+r.status);
     return r.json().then(function(d){
-      if(d.version===0){ CLOUD.version = 0; cloudPush(true); return; }   // empty database: seed it from here
+      if(d.version===0){                                   // empty account: seed it from this device
+        CLOUD.version = 0; cloudPush(true);
+        if(first) setSave("Account ready — this device's data is now the starting point ☁");
+        return;
+      }
       if(d.version > CLOUD.version && d.state){
         cloudAdopt(d.state, d.version);
-        if(!silent) setSave("Updated from your database ☁");
+        if(first) setSave("Loaded your data ☁");
+        else if(!silent) setSave("Updated from your account ☁");
       } else CLOUD.version = d.version;
-      syncBtn("☁ Cloud","on");
+      syncBtn("☁ " + (CLOUD.user || "Cloud"), "on");
     });
   }).catch(function(){
     CLOUD.pulling = false;
@@ -2366,10 +2438,10 @@ function cloudPush(immediate){
   if(!CLOUD.on) return;
   clearTimeout(CLOUD.pushTimer);
   CLOUD.pushTimer = setTimeout(function(){
-    fetch("/api/state", {method:"PUT", headers: cloudHead(),
+    fetch("/api/state", {method:"PUT", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({baseVersion: CLOUD.version, state: state})})
     .then(function(r){
-      if(r.status===401){ askPasscode("That passcode was wrong — try again"); return; }
+      if(r.status===401){ authShow("Your session ended — sign in again"); return; }
       if(r.status===409){
         return r.json().then(function(d){
           cloudAdopt(d.state, d.version);
@@ -2379,7 +2451,7 @@ function cloudPush(immediate){
       if(!r.ok) throw new Error("HTTP "+r.status);
       return r.json().then(function(d){
         CLOUD.version = d.version;
-        setSave("Saved ☁"); syncBtn("☁ Cloud","on");
+        setSave("Saved ☁"); syncBtn("☁ " + (CLOUD.user || "Cloud"), "on");
       });
     })
     .catch(function(){
@@ -2389,35 +2461,33 @@ function cloudPush(immediate){
   }, immediate===true ? 0 : 900);
 }
 (function detectCloud(){
-  fetch("/api/state", {headers: cloudHead()}).then(function(r){
+  fetch("/api/auth").then(function(r){
     if(r.status===404) return;                       // no API here (e.g. GitHub Pages) — stay local
     CLOUD.on = true;
-    if(r.status===401){ askPasscode(); return; }
     if(r.status===503){
       return r.json().then(function(d){ syncBtn("☁ Setup","bad"); setSave(d.message||"Database not configured yet", true); });
     }
+    if(r.status===401){ authShow(); return; }
     if(!r.ok) throw new Error("HTTP "+r.status);
     return r.json().then(function(d){
-      if(d.version===0){ CLOUD.version = 0; cloudPush(true); setSave("Database ready — this device's data is now the starting point ☁"); }
-      else { cloudAdopt(d.state, d.version); setSave("Loaded from your database ☁"); }
-      syncBtn("☁ Cloud","on");
+      CLOUD.user = d.user;
+      cloudPull(false, true);
     });
   }).catch(function(){ /* offline or no API: local saving carries on */ });
 })();
-setInterval(function(){ if(CLOUD.on && !document.hidden) cloudPull(true); }, 20000);
-document.addEventListener("visibilitychange", function(){ if(!document.hidden && CLOUD.on) cloudPull(true); });
-// in database mode the ☁ button explains itself instead of opening the gist setup
+setInterval(function(){ if(CLOUD.on && CLOUD.user && !document.hidden) cloudPull(true); }, 20000);
+document.addEventListener("visibilitychange", function(){ if(!document.hidden && CLOUD.on && CLOUD.user) cloudPull(true); });
+// in database mode the ☁ button shows who is signed in instead of opening the gist setup
 (function(){
   var btn = document.getElementById("syncbtn"), gistClick = btn.onclick;
   btn.onclick = function(){
     if(CLOUD.on){
-      askConfirm("☁ Connected to your database. Every change saves straight there, so every device is always up to date — nothing to sync. Press OK to re-enter the passcode.", function(yes){ if(yes) askPasscode(); });
+      askConfirm("☁ Signed in as " + (CLOUD.user || "you") + ". Every change saves straight to your account, so every device is always up to date — nothing to sync. Press OK to sign out.", function(yes){ if(yes) signOut(); });
       return;
     }
     gistClick();
   };
 })();
-
 refresh();
 renderHours();
 renderTodos();

@@ -20,10 +20,11 @@ A single-file, no-dependency HTML tracker for building daily consistency over a 
 |---|---|---|
 | Open `index.html` locally | that browser only | trying it out |
 | GitHub Pages | that browser, plus optional GitHub Gist sync | simple, no account setup |
-| **Vercel + Neon** — see **[DEPLOY.md](DEPLOY.md)** | **one database, shared by every device** | **daily use across phone and laptop** |
+| **Vercel + Neon** — see **[DEPLOY.md](DEPLOY.md)** | **sign in with username + password; one database row per account, shared by every device** | **daily use across phone and laptop** |
 
-With Vercel + Neon there is no syncing at all: every device reads and writes the same
-database row, so whatever you change is immediately what everything else shows.
+With Vercel + Neon there is no syncing at all: you sign in with a username and password,
+and every device signed into the same account reads and writes the same database row,
+so whatever you change is immediately what everything else shows.
 
 ## Usage
 
